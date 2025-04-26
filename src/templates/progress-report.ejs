@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title><%= student.name %> - Progress Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .section { margin-bottom: 20px; }
+    .chart { text-align: center; margin: 20px 0; }
+    .badge { 
+      display: inline-block; 
+      padding: 3px 8px; 
+      border-radius: 3px; 
+      font-weight: bold;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><%= student.name %> - Progress Report</h1>
+    <p>Report Period: <%= moment().subtract(1, timeframe).format('MMM D') %> to <%= moment().format('MMM D, YYYY') %></p>
+  </div>
+
+  <div class="section">
+    <h2>Overall Progress</h2>
+    <div class="chart">
+      <img src="<%= generateChartImage(weekly, 'mastery') %>" alt="Mastery Over Time">
+    </div>
+    <p>
+      Current Mastery Level: 
+      <span class="badge" style="background: <%= getMasteryColor(avgMastery) %>">
+        <%= (avgMastery * 100).toFixed(0) %>%
+      </span>
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Time Investment</h2>
+    <div class="chart">
+      <img src="<%= generateChartImage(weekly, 'time') %>" alt="Time Spent Learning">
+    </div>
+    <p>Total time spent: <%= totalTime %> minutes</p>
+  </div>
+
+  <div class="section">
+    <h2>Concept Breakdown</h2>
+    <table>
+      <tr>
+        <th>Concept</th>
+        <th>Current Mastery</th>
+        <th>Improvement</th>
+        <th>Time Spent</th>
+      </tr>
+      <% byConcept.forEach(concept => { %>
+        <tr>
+          <td><%= concept.name %></td>
+          <td><%= (concept.current * 100).toFixed(0) %>%</td>
+          <td><%= (concept.improvement * 100).toFixed(0) %>%</td>
+          <td><%= concept.time %> min</td>
+        </tr>
+      <% }) %>
+    </table>
+  </div>
+
+  <% if (recommendations.length > 0) { %>
+    <div class="section">
+      <h2>Recommendations</h2>
+      <ul>
+        <% recommendations.forEach(rec => { %>
+          <li><%= rec.message %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <div class="footer">
+    <p>Generated on <%= moment().format('MMMM D, YYYY') %></p>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,37 @@
+.math-symbols-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 4px;
+  margin-bottom: 16px;
+
+  .symbol-group {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #f0f0f0;
+  }
+
+  .symbol-button {
+    padding: 4px 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+      background: #f5f5f5;
+      border-color: #40a9ff;
+    }
+
+    &.active {
+      background: #e6f7ff;
+      border-color: #40a9ff;
+    }
+  }
+} 

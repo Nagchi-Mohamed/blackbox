@@ -1,0 +1,51 @@
+.classroom-container {
+  height: 100vh;
+  display: flex;
+  
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 16px;
+    
+    .whiteboard-container {
+      flex: 1;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+      background-color: var(--background-color);
+    }
+    
+    .video-chat-container {
+      height: 300px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+      background-color: var(--background-color);
+    }
+  }
+  
+  .classroom-sidebar {
+    background: var(--background-color);
+    padding: 16px;
+    overflow-y: auto;
+    border-left: 1px solid var(--border-color);
+    
+    .sidebar-section {
+      margin-bottom: 24px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+[data-theme='dark'] {
+  .classroom-container {
+    .classroom-sidebar {
+      background: var(--background-color);
+    }
+  }
+} 

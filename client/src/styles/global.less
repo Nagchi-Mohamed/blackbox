@@ -1,0 +1,171 @@
+@import './variables.less';
+@import '~antd/dist/antd.less';
+
+// Reset default styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif;
+  font-size: @font-size-base;
+  line-height: 1.5;
+  color: @text-color;
+  background-color: @background-color-base;
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+  color: @heading-color;
+  font-weight: 500;
+  margin-bottom: @margin-md;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+// Links
+a {
+  color: @primary-color;
+  text-decoration: none;
+  transition: color 0.3s;
+
+  &:hover {
+    color: lighten(@primary-color, 10%);
+  }
+}
+
+// Layout containers
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 @padding-md;
+}
+
+// Common utility classes
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.mt-lg { margin-top: @margin-lg; }
+.mt-md { margin-top: @margin-md; }
+.mt-sm { margin-top: @margin-sm; }
+
+.mb-lg { margin-bottom: @margin-lg; }
+.mb-md { margin-bottom: @margin-md; }
+.mb-sm { margin-bottom: @margin-sm; }
+
+.p-lg { padding: @padding-lg; }
+.p-md { padding: @padding-md; }
+.p-sm { padding: @padding-sm; }
+
+// Responsive utilities
+.hide-xs {
+  @media (max-width: @screen-xs) {
+    display: none !important;
+  }
+}
+
+.hide-sm {
+  @media (max-width: @screen-sm) {
+    display: none !important;
+  }
+}
+
+.hide-md {
+  @media (max-width: @screen-md) {
+    display: none !important;
+  }
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: @background-color-light;
+}
+
+::-webkit-scrollbar-thumb {
+  background: lighten(@primary-color, 20%);
+  border-radius: 3px;
+
+  &:hover {
+    background: @primary-color;
+  }
+}
+
+// Theme customization
+@primary-color: #1890ff;
+@link-color: #1890ff;
+@success-color: #52c41a;
+@warning-color: #faad14;
+@error-color: #f5222d;
+@font-size-base: 14px;
+@heading-color: rgba(0, 0, 0, 0.85);
+@text-color: rgba(0, 0, 0, 0.65);
+@text-color-secondary: rgba(0, 0, 0, 0.45);
+@border-radius-base: 4px;
+@border-color-base: #d9d9d9;
+
+// Global styles
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Layout styles
+.app-container {
+  min-height: 100vh;
+}
+
+.main-content {
+  padding: 24px;
+  min-height: calc(100vh - 64px); // Subtract header height
+}
+
+// Form styles
+.auth-form {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 24px;
+  
+  .ant-form-item {
+    margin-bottom: 24px;
+  }
+  
+  .form-buttons {
+    margin-top: 24px;
+  }
+}
+
+// Common utility classes
+.text-center {
+  text-align: center;
+}
+
+.mb-24 {
+  margin-bottom: 24px;
+}
+
+.mt-24 {
+  margin-top: 24px;
+}
+
+.p-24 {
+  padding: 24px;
+} 
