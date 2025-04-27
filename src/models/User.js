@@ -7,14 +7,15 @@ class User {
     email,
     password,
     role = 'student',
-    profile_pic_url = null
+    first_name = null,
+    last_name = null
   }) {
-    const password_hash = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     
     const [result] = await pool.query(
-      `INSERT INTO users (username, email, password_hash, role, profile_pic_url)
-       VALUES (?, ?, ?, ?, ?)`,
-      [username, email, password_hash, role, profile_pic_url]
+      `INSERT INTO users (username, email, password, role, first_name, last_name)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [username, email, hashedPassword, role, first_name, last_name]
     );
     
     return result.insertId;
@@ -30,10 +31,7 @@ class User {
 
   static async findById(user_id) {
     const [rows] = await pool.query(
-      `SELECT u.*, p.* 
-       FROM users u
-       LEFT JOIN user_profiles p ON u.user_id = p.user_id
-       WHERE u.user_id = ?`,
+      'SELECT * FROM users WHERE user_id = ?',
       [user_id]
     );
     return rows[0];
@@ -45,9 +43,9 @@ class User {
     
     for (const [key, value] of Object.entries(updates)) {
       if (key === 'password') {
-        const password_hash = await bcrypt.hash(value, 10);
-        fields.push('password_hash = ?');
-        params.push(password_hash);
+        const hashedPassword = await bcrypt.hash(value, 10);
+        fields.push('password = ?');
+        params.push(hashedPassword);
       } else {
         fields.push(`${key} = ?`);
         params.push(value);
@@ -104,8 +102,8 @@ class User {
     return rows;
   }
 
-  static async verifyPassword(password, password_hash) {
-    return bcrypt.compare(password, password_hash);
+  static async verifyPassword(password, hashedPassword) {
+    return bcrypt.compare(password, hashedPassword);
   }
 }
 

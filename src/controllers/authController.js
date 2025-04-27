@@ -1,12 +1,10 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { BadRequestError, UnauthorizedError } = require('../errors');
-const bcrypt = require('bcrypt');
-const pool = require('../utils/db');
 
 const register = async (req, res) => {
   try {
-    const { username, email, password, role, education_level } = req.body;
+    const { username, email, password, role, first_name, last_name } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
@@ -19,12 +17,9 @@ const register = async (req, res) => {
       username,
       email,
       password,
-      role
-    });
-
-    // Create user profile
-    await User.createProfile(user_id, {
-      education_level
+      role,
+      first_name,
+      last_name
     });
 
     // Generate JWT token
@@ -42,7 +37,9 @@ const register = async (req, res) => {
           user_id,
           username,
           email,
-          role
+          role,
+          first_name,
+          last_name
         }
       }
     });
@@ -60,19 +57,13 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Find user by email
-    const [users] = await pool.query(
-      'SELECT * FROM users WHERE email = ?',
-      [email]
-    );
-
-    if (users.length === 0) {
+    const user = await User.findByEmail(email);
+    if (!user) {
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    const user = users[0];
-
     // Check password
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await User.verifyPassword(password, user.password);
     if (!isValid) {
       throw new UnauthorizedError('Invalid email or password');
     }
@@ -81,21 +72,24 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { 
         user_id: user.user_id,
-        username: user.username,
-        user_type: user.user_type
+        role: user.role
       },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
     res.json({
       success: true,
-      token,
-      user: {
-        user_id: user.user_id,
-        username: user.username,
-        email: user.email,
-        user_type: user.user_type
+      data: {
+        token,
+        user: {
+          user_id: user.user_id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          first_name: user.first_name,
+          last_name: user.last_name
+        }
       }
     });
   } catch (error) {
@@ -123,11 +117,8 @@ const getMe = async (req, res) => {
           username: user.username,
           email: user.email,
           role: user.role,
-          profile_pic_url: user.profile_pic_url,
-          bio: user.bio,
-          education_level: user.education_level,
-          interests: user.interests,
-          achievements: user.achievements
+          first_name: user.first_name,
+          last_name: user.last_name
         }
       }
     });

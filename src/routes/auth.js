@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { authenticate } = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const { registerSchema, loginSchema } = require('../validations/authValidation');
 
@@ -22,7 +22,7 @@ router.post(
 // Get current user
 router.get(
   '/me',
-  authenticate,
+  auth,
   authController.getMe
 );
 
