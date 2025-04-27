@@ -1,39 +1,40 @@
 const net = require('net');
 const logger = require('./logger');
 
-async function findAvailablePort(startPort) {
-  return new Promise((resolve, reject) => {
+const isPortAvailable = (port) => {
+  return new Promise((resolve) => {
     const server = net.createServer();
-    server.unref();
-    server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        resolve(findAvailablePort(startPort + 1));
-      } else {
-        reject(err);
-      }
+    
+    server.once('error', () => {
+      resolve(false);
     });
-    server.listen(startPort, () => {
-      server.close(() => {
-        resolve(startPort);
-      });
+    
+    server.once('listening', () => {
+      server.close();
+      resolve(true);
     });
+    
+    server.listen(port);
   });
-}
+};
 
-async function getAvailablePort(startPort = 8000, maxAttempts = 10) {
-  try {
-    const port = await findAvailablePort(startPort);
-    logger.info(`Found available port: ${port}`);
-    return port;
-  } catch (error) {
-    if (maxAttempts > 0) {
-      logger.warn(`Failed to find port ${startPort}, trying ${startPort + 1}`);
-      return getAvailablePort(startPort + 1, maxAttempts - 1);
+const getAvailablePort = async (startPort) => {
+  let port = startPort;
+  const maxPort = startPort + 10; // Try up to 10 ports
+  
+  while (port < maxPort) {
+    const available = await isPortAvailable(port);
+    if (available) {
+      return port;
     }
-    throw new Error('Could not find an available port');
+    logger.warn(`Port ${port} is already in use, trying ${port + 1}`);
+    port++;
   }
-}
+  
+  throw new Error(`No available ports found between ${startPort} and ${maxPort}`);
+};
 
 module.exports = {
+  isPortAvailable,
   getAvailablePort
 }; 

@@ -1,74 +1,35 @@
-const { AppError } = require('../errors');
+const logger = require('../config/logger');
+const ApiError = require('../utils/ApiError');
 
+class AppError extends Error {
+  constructor(statusCode, message) {
+    super(message);
+    this.statusCode = statusCode;
+    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.isOperational = true;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+/**
+ * Error handling middleware
+ */
 const errorHandler = (err, req, res, next) => {
-  console.error(err.stack);
-
-  if (err instanceof AppError) {
-    return res.status(err.statusCode).json({
-      error: {
-        message: err.message,
-        code: err.code,
-        details: err.details
-      }
-    });
+  // If err is not an instance of ApiError, convert it
+  if (!(err instanceof ApiError)) {
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Internal Server Error';
+    err = new ApiError(statusCode, message, false);
   }
 
-  // Handle JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    return res.status(401).json({
-      error: {
-        message: 'Invalid token',
-        code: 'INVALID_TOKEN'
-      }
-    });
-  }
+  const response = {
+    success: false,
+    message: err.message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  };
 
-  if (err.name === 'TokenExpiredError') {
-    return res.status(401).json({
-      error: {
-        message: 'Token expired',
-        code: 'TOKEN_EXPIRED'
-      }
-    });
-  }
-
-  // Handle database errors
-  if (err.code === 'ER_DUP_ENTRY') {
-    return res.status(409).json({
-      error: {
-        message: 'Duplicate entry',
-        code: 'DUPLICATE_ENTRY'
-      }
-    });
-  }
-
-  if (err.code === 'ER_NO_SUCH_TABLE') {
-    return res.status(500).json({
-      error: {
-        message: 'Database table does not exist',
-        code: 'DB_TABLE_MISSING'
-      }
-    });
-  }
-
-  // Handle validation errors
-  if (err.name === 'ValidationError') {
-    return res.status(422).json({
-      error: {
-        message: 'Validation failed',
-        code: 'VALIDATION_ERROR',
-        details: err.details
-      }
-    });
-  }
-
-  // Default error
-  res.status(500).json({
-    error: {
-      message: 'Internal server error',
-      code: 'INTERNAL_ERROR'
-    }
-  });
+  res.status(err.statusCode).json(response);
 };
 
 module.exports = errorHandler; 

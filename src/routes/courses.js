@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticate, authorize } = require('../middleware/authMiddleware');
+const { auth, authorize } = require('../middleware/auth');
 const courseController = require('../controllers/courseController');
 
 /**
@@ -63,7 +63,8 @@ router.get('/', courseController.getCourses);
  *             schema:
  *               $ref: '#/components/schemas/Course'
  */
-router.post('/', authenticate, authorize(['teacher', 'admin']), courseController.createCourse);
+router.use(auth);
+router.post('/', authorize(['teacher', 'admin']), courseController.createCourse);
 
 /**
  * @swagger
@@ -88,7 +89,7 @@ router.post('/', authenticate, authorize(['teacher', 'admin']), courseController
  *       404:
  *         description: Course not found
  */
-router.get('/:id', authenticate, courseController.getCourse);
+router.get('/:id', courseController.getCourseById);
 
 /**
  * @swagger
@@ -127,7 +128,7 @@ router.get('/:id', authenticate, courseController.getCourse);
  *       404:
  *         description: Course not found
  */
-router.put('/:id', authenticate, authorize(['teacher', 'admin']), courseController.updateCourse);
+router.put('/:id', authorize(['teacher', 'admin']), courseController.updateCourse);
 
 /**
  * @swagger
@@ -152,9 +153,9 @@ router.put('/:id', authenticate, authorize(['teacher', 'admin']), courseControll
  *       404:
  *         description: Course not found
  */
-router.delete('/:id', authenticate, authorize(['admin']), courseController.deleteCourse);
+router.delete('/:id', authorize(['admin']), courseController.deleteCourse);
 
 // Enroll in course
-router.post('/:id/enroll', authenticate, courseController.enrollInCourse);
+router.post('/:id/enroll', auth, courseController.enrollInCourse);
 
 module.exports = router; 

@@ -1,6 +1,6 @@
 import api from './api';
 
-export const courseService = {
+const courseService = {
   getCourses: async (params = {}) => {
     const response = await api.get('/courses', { params });
     return response.data;
@@ -35,4 +35,6 @@ export const courseService = {
     const response = await api.get(`/courses/${courseId}/lessons`);
     return response.data;
   }
-}; 
+};
+
+export default courseService;

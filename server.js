@@ -6,10 +6,10 @@ const morgan = require('morgan');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const logger = require('./src/utils/logger');
-const runMigrations = require('./src/db/migrate');
+const { testConnection } = require('./src/config/database');
+const initializeDatabase = require('./src/db/init');
 const errorHandler = require('./src/middleware/errorHandler');
 const { setupTempDir, setupThumbnailCleanup } = require('./src/utils/setupTempDir');
-const initializeDatabase = require('./src/utils/db').initializeDatabase;
 const socketService = require('./src/services/socketService');
 const { getAvailablePort } = require('./src/utils/portManager');
 
@@ -21,9 +21,6 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST']
   }
 });
-
-const PORT = process.env.PORT || 5000;
-const backupPorts = [8000, 8001, 8002, 8003, 8004];
 
 // Middleware
 app.use(cors());
@@ -81,46 +78,29 @@ io.on('connection', (socket) => {
 // Start server
 async function startServer() {
   try {
-    // Initialize database and run migrations
-    await initializeDatabase();
-    await runMigrations();
+    // Test database connection
+    const dbConnected = await testConnection();
+    if (!dbConnected) {
+      throw new Error('Database connection failed');
+    }
+
+    // Initialize database tables
+    const dbInitialized = await initializeDatabase();
+    if (!dbInitialized) {
+      throw new Error('Database initialization failed');
+    }
+
+    // Get available port
+    const port = await getAvailablePort(process.env.PORT || 5000);
     
-    // Define ports to try
-    const ports = [3000, 3001, 3002, 3003, 3004, 3005];
-    let server;
-    let port;
-
-    // Try each port in sequence
-    for (const p of ports) {
-      try {
-        port = p;
-        server = await new Promise((resolve, reject) => {
-          const s = httpServer.listen(p, () => resolve(s))
-            .on('error', (err) => {
-              if (err.code === 'EADDRINUSE') {
-                logger.warn(`Port ${p} is already in use`);
-                resolve(null);
-              } else {
-                reject(err);
-              }
-            });
-        });
-        if (server) break;
-      } catch (err) {
-        logger.error(`Error trying port ${p}:`, err);
-      }
-    }
-
-    if (!server) {
-      throw new Error('Could not find an available port');
-    }
-
-    logger.info(`Server running on port ${port}`);
+    httpServer.listen(port, () => {
+      logger.info(`Server running on port ${port}`);
+    });
 
     // Handle process termination
     process.on('SIGTERM', () => {
       logger.info('SIGTERM received. Shutting down gracefully...');
-      server.close(() => {
+      httpServer.close(() => {
         logger.info('Server closed');
         process.exit(0);
       });

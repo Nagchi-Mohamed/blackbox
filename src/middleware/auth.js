@@ -1,26 +1,33 @@
 const jwt = require('jsonwebtoken');
+const config = require('../config/config');
+const ApiError = require('../utils/ApiError');
 const { UnauthorizedError } = require('../utils/errors');
 const logger = require('../utils/logger');
+const { pool } = require('../config/database');
 
-const authenticate = async (req, res, next) => {
+const auth = (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedError('No token provided');
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      throw new ApiError(401, 'Authentication required');
     }
 
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+    const decoded = jwt.verify(token, config.jwt.secret);
     req.user = decoded;
     next();
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      next(new UnauthorizedError('Invalid token'));
-    } else {
-      next(error);
-    }
+    next(new ApiError(401, 'Invalid or expired token'));
   }
+};
+
+auth.hasRole = (role) => {
+  return (req, res, next) => {
+    if (req.user.role !== role) {
+      return next(new ApiError(403, 'Insufficient permissions'));
+    }
+    next();
+  };
 };
 
 const authorize = (roles = []) => {
@@ -71,7 +78,7 @@ const isParent = (req, res, next) => {
 };
 
 module.exports = {
-  authenticate,
+  auth,
   authorize,
   isAdmin,
   isTeacher,

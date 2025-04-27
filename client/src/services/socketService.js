@@ -1,71 +1,141 @@
-import io from 'socket.io-client';
-import config from '../config';
+import { io } from 'socket.io-client';
 
-class SocketService {
-  constructor() {
-    this.socket = null;
-    this.listeners = new Map();
-  }
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
 
-  connect(token) {
-    if (this.socket) {
-      return;
-    }
+const socket = io(SOCKET_URL, {
+  withCredentials: true,
+  autoConnect: false,
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  timeout: 10000,
+});
 
-    this.socket = io(config.socketUrl, {
-      auth: { token },
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000
-    });
+export const connectSocket = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      if (!socket.connected) {
+        socket.connect();
+        
+        socket.on('connect', () => {
+          console.log('Socket connected successfully');
+          resolve(true);
+        });
 
-    this.socket.on('connect', () => {
-      console.log('Socket connected');
-    });
-
-    this.socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
-
-    this.socket.on('error', (error) => {
-      console.error('Socket error:', error);
-    });
-  }
-
-  disconnect() {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
-    }
-  }
-
-  emit(event, data) {
-    if (this.socket) {
-      this.socket.emit(event, data);
-    }
-  }
-
-  on(event, callback) {
-    if (this.socket) {
-      this.socket.on(event, callback);
-      this.listeners.set(event, callback);
-    }
-  }
-
-  off(event) {
-    if (this.socket) {
-      const callback = this.listeners.get(event);
-      if (callback) {
-        this.socket.off(event, callback);
-        this.listeners.delete(event);
+        socket.on('connect_error', (error) => {
+          console.error('Socket connection error:', error);
+          reject(error);
+        });
+      } else {
+        resolve(true);
       }
+    } catch (error) {
+      console.error('Socket connection error:', error);
+      reject(error);
     }
-  }
+  });
+};
 
-  getSocket() {
-    return this.socket;
-  }
-}
+export const disconnectSocket = () => {
+  return new Promise((resolve) => {
+    try {
+      if (socket.connected) {
+        socket.disconnect();
+        console.log('Socket disconnected successfully');
+      }
+      resolve(true);
+    } catch (error) {
+      console.error('Socket disconnection error:', error);
+      resolve(false);
+    }
+  });
+};
 
-export default new SocketService(); 
+export const joinRoom = (roomId) => {
+  return new Promise((resolve, reject) => {
+    try {
+      if (!socket.connected) {
+        reject(new Error('Socket not connected'));
+        return;
+      }
+      
+      socket.emit('join-room', roomId);
+      resolve(true);
+    } catch (error) {
+      console.error('Error joining room:', error);
+      reject(error);
+    }
+  });
+};
+
+export const leaveRoom = (roomId) => {
+  return new Promise((resolve, reject) => {
+    try {
+      if (!socket.connected) {
+        reject(new Error('Socket not connected'));
+        return;
+      }
+      
+      socket.emit('leave-room', roomId);
+      resolve(true);
+    } catch (error) {
+      console.error('Error leaving room:', error);
+      reject(error);
+    }
+  });
+};
+
+export const onSocketEvent = (event, callback) => {
+  if (typeof event !== 'string' || typeof callback !== 'function') {
+    throw new Error('Invalid event or callback');
+  }
+  socket.on(event, callback);
+  
+  // Return cleanup function
+  return () => offSocketEvent(event, callback);
+};
+
+export const offSocketEvent = (event, callback) => {
+  if (typeof event !== 'string' || typeof callback !== 'function') {
+    throw new Error('Invalid event or callback');
+  }
+  socket.off(event, callback);
+};
+
+export const emitEvent = (event, data) => {
+  return new Promise((resolve, reject) => {
+    try {
+      if (!socket.connected) {
+        reject(new Error('Socket not connected'));
+        return;
+      }
+
+      socket.emit(event, data, (response) => {
+        if (response?.error) {
+          reject(response.error);
+        } else {
+          resolve(response);
+        }
+      });
+    } catch (error) {
+      console.error('Error emitting event:', error);
+      reject(error);
+    }
+  });
+};
+
+// Listen for reconnection events
+socket.on('reconnect', (attemptNumber) => {
+  console.log(`Socket reconnected after ${attemptNumber} attempts`);
+});
+
+socket.on('reconnect_error', (error) => {
+  console.error('Socket reconnection error:', error);
+});
+
+socket.on('reconnect_failed', () => {
+  console.error('Socket reconnection failed');
+});
+
+export { socket };
+export default socket;

@@ -1,13 +1,35 @@
-const { BadRequestError } = require('../errors');
-const logger = require('../utils/logger');
+const Joi = require('joi');
+const { AppError } = require('./errorHandler');
 
 const validate = (schema) => {
   return (req, res, next) => {
-    const { error } = schema.validate(req.body);
+    const validationOptions = {
+      abortEarly: false, // include all errors
+      allowUnknown: true, // ignore unknown props
+      stripUnknown: true // remove unknown props
+    };
+
+    const validateData = {};
+    if (schema.body) validateData.body = req.body;
+    if (schema.query) validateData.query = req.query;
+    if (schema.params) validateData.params = req.params;
+
+    const { error, value } = Joi.object(schema).validate(validateData, validationOptions);
+    
     if (error) {
-      throw new BadRequestError(error.details[0].message);
+      const errorMessage = error.details
+        .map((detail) => detail.message)
+        .join(', ');
+      
+      return next(new AppError(400, errorMessage));
     }
-    next();
+
+    // Replace request data with validated data
+    if (schema.body) req.body = value.body;
+    if (schema.query) req.query = value.query;
+    if (schema.params) req.params = value.params;
+
+    return next();
   };
 };
 

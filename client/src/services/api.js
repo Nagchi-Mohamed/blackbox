@@ -1,83 +1,33 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+import axios from 'axios';
 
-export const handleResponse = async (response) => {
-  const data = await response.json();
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+  withCredentials: true,
+});
 
-  if (!response.ok) {
-    const error = (data && data.message) || response.statusText;
+// Request interceptor
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized access
+      localStorage.removeItem('token');
+      window.location = '/login';
+    }
     return Promise.reject(error);
   }
-
-  return data;
-};
-
-export const handleError = (error) => {
-  console.error('API Error:', error);
-  throw error;
-};
-
-const api = {
-  get: async (endpoint) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      return handleResponse(response);
-    } catch (error) {
-      return handleError(error);
-    }
-  },
-
-  post: async (endpoint, data) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(data)
-      });
-      return handleResponse(response);
-    } catch (error) {
-      return handleError(error);
-    }
-  },
-
-  put: async (endpoint, data) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(data)
-      });
-      return handleResponse(response);
-    } catch (error) {
-      return handleError(error);
-    }
-  },
-
-  delete: async (endpoint) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      return handleResponse(response);
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-};
+);
 
 export default api; 

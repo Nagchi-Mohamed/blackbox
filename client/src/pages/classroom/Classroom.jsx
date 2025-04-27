@@ -10,7 +10,7 @@ import MathEquationEditor from '../../components/classroom/MathEquationEditor';
 import BreakoutRoomsManager from '../../components/classroom/BreakoutRoomsManager';
 import FileSharing from '../../components/classroom/FileSharing';
 import ClassroomControls from '../../components/classroom/ClassroomControls';
-import { socket } from '../../services/socketService';
+import socket, { connectSocket, disconnectSocket, joinRoom, leaveRoom } from '../../services/socketService';
 import { classroomService } from '../../services/classroomService';
 import './Classroom.less';
 
@@ -35,8 +35,8 @@ const Classroom = () => {
         setIsTeacher(classroom.isTeacher);
         
         // Connect to socket
-        socket.connect();
-        socket.emit('join-classroom', { classroomId });
+        connectSocket();
+        joinRoom(classroomId);
         
         // Set up socket listeners
         socket.on('whiteboard-update', (data) => {
@@ -68,7 +68,8 @@ const Classroom = () => {
       socket.off('whiteboard-update');
       socket.off('participants-update');
       socket.off('new-message');
-      socket.disconnect();
+      leaveRoom(classroomId);
+      disconnectSocket();
     };
   }, [classroomId]);
 
