@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const classroomController = require('../controllers/classroomController');
-const { authenticate } = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const { classroomSchema } = require('../validations/classroomValidation');
 
 // Create new classroom
 router.post(
   '/',
-  authenticate,
+  auth,
   validate(classroomSchema),
   classroomController.createClassroom
 );
@@ -16,28 +16,28 @@ router.post(
 // Join classroom
 router.post(
   '/:id/join',
-  authenticate,
+  auth,
   classroomController.joinClassroom
 );
 
 // Start classroom session
 router.post(
   '/:id/start',
-  authenticate,
+  auth,
   classroomController.startClassroom
 );
 
 // End classroom session
 router.post(
   '/:id/end',
-  authenticate,
+  auth,
   classroomController.endClassroom
 );
 
 // Get classroom details
 router.get(
   '/:id',
-  authenticate,
+  auth,
   classroomController.getClassroomDetails
 );
 

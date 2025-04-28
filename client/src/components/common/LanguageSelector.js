@@ -1,32 +1,50 @@
-import React, { useContext } from 'react';
-import { Select } from 'antd';
-import { GlobalOutlined } from '@ant-design/icons';
-import { LanguageContext } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
+import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
+import { Translate } from '@mui/icons-material';
+import { useState } from 'react';
 
-const { Option } = Select;
+const LanguageSelector = () => {
+  const { i18n, t } = useTranslation();
+  const [anchorEl, setAnchorEl] = useState(null);
 
-export const LanguageSelector = () => {
-  const { language, changeLanguage } = useContext(LanguageContext);
-  
-  const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'fr', name: 'Français' },
-    { code: 'es', name: 'Español' },
-    { code: 'zh', name: '中文' }
-  ];
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    handleCloseMenu();
+  };
 
   return (
-    <Select
-      value={language}
-      onChange={changeLanguage}
-      style={{ width: 120 }}
-      suffixIcon={<GlobalOutlined />}
-    >
-      {languages.map(lang => (
-        <Option key={lang.code} value={lang.code}>
-          {lang.name}
-        </Option>
-      ))}
-    </Select>
+    <>
+      <Tooltip title={t('settings.language')}>
+        <IconButton onClick={handleOpenMenu} color="inherit">
+          <Translate />
+        </IconButton>
+      </Tooltip>
+      
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
+      >
+        <MenuItem onClick={() => changeLanguage('en')}>
+          {t('languages.english')}
+        </MenuItem>
+        <MenuItem onClick={() => changeLanguage('fr')}>
+          {t('languages.french')}
+        </MenuItem>
+        <MenuItem onClick={() => changeLanguage('ar')}>
+          {t('languages.arabic')}
+        </MenuItem>
+      </Menu>
+    </>
   );
-}; 
+};
+
+export default LanguageSelector; 

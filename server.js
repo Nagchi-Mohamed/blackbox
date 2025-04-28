@@ -6,12 +6,13 @@ const morgan = require('morgan');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const logger = require('./src/utils/logger');
-const { testConnection } = require('./src/config/database');
-const initializeDatabase = require('./src/db/init');
+const mongoose = require('mongoose');
 const errorHandler = require('./src/middleware/errorHandler');
 const { setupTempDir, setupThumbnailCleanup } = require('./src/utils/setupTempDir');
 const socketService = require('./src/services/socketService');
 const { getAvailablePort } = require('./src/utils/portManager');
+const path = require('path');
+const setupSwagger = require('./src/swagger');
 
 const app = express();
 const httpServer = createServer(app);
@@ -33,6 +34,9 @@ app.use(express.urlencoded({ extended: true }));
 setupTempDir();
 setupThumbnailCleanup();
 
+// Setup Swagger documentation
+setupSwagger(app);
+
 // Routes
 app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/courses', require('./src/routes/courses'));
@@ -47,10 +51,20 @@ app.use('/api/reports', require('./src/routes/reportRoutes'));
 app.use('/api/progress', require('./src/routes/progressRoutes'));
 app.use('/api/adaptive', require('./src/routes/adaptiveRoutes'));
 app.use('/api/ai', require('./src/routes/aiRoutes'));
+app.use('/api/security', require('./src/routes/securityRoutes'));
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build/index.html'));
 });
 
 // Error handling middleware (must be last)
@@ -78,17 +92,12 @@ io.on('connection', (socket) => {
 // Start server
 async function startServer() {
   try {
-    // Test database connection
-    const dbConnected = await testConnection();
-    if (!dbConnected) {
-      throw new Error('Database connection failed');
-    }
-
-    // Initialize database tables
-    const dbInitialized = await initializeDatabase();
-    if (!dbInitialized) {
-      throw new Error('Database initialization failed');
-    }
+    // Connect to MongoDB
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/brainymath', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    logger.info('Connected to MongoDB');
 
     // Get available port
     const port = await getAvailablePort(process.env.PORT || 5000);

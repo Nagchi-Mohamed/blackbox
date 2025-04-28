@@ -4,84 +4,79 @@ const ApiError = require('../utils/ApiError');
 const { UnauthorizedError } = require('../utils/errors');
 const logger = require('../utils/logger');
 const { pool } = require('../config/database');
+const User = require('../models/User');
 
-const auth = (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    
-    if (!token) {
-      throw new ApiError(401, 'Authentication required');
+// Authentication middleware
+const auth = async (req, res, next) => {
+    try {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        
+        if (!token) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        if (!user.active) {
+            return res.status(401).json({ message: 'User account is inactive' });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        logger.error('Authentication error:', error);
+        res.status(401).json({ message: 'Invalid authentication token' });
     }
-
-    const decoded = jwt.verify(token, config.jwt.secret);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    next(new ApiError(401, 'Invalid or expired token'));
-  }
 };
 
-auth.hasRole = (role) => {
-  return (req, res, next) => {
-    if (req.user.role !== role) {
-      return next(new ApiError(403, 'Insufficient permissions'));
-    }
-    next();
-  };
-};
-
-const authorize = (roles = []) => {
-  if (typeof roles === 'string') {
-    roles = [roles];
-  }
-
-  return (req, res, next) => {
-    if (!req.user) {
-      return next(new UnauthorizedError('User not authenticated'));
-    }
-
-    if (roles.length && !roles.includes(req.user.role)) {
-      return next(new UnauthorizedError('Unauthorized access'));
-    }
-
-    next();
-  };
-};
-
-// Role-specific middleware
-const isAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return next(new UnauthorizedError('Admin access required'));
-  }
-  next();
+// Role-based authorization middleware
+const authorize = (roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+        next();
+    };
 };
 
 const isTeacher = (req, res, next) => {
-  if (!req.user || !['teacher', 'admin'].includes(req.user.role)) {
-    return next(new UnauthorizedError('Teacher access required'));
-  }
-  next();
+    if (req.user.role !== 'teacher' && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Teacher access required' });
+    }
+    next();
+};
+
+const isAdmin = (req, res, next) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+    }
+    next();
 };
 
 const isStudent = (req, res, next) => {
-  if (!req.user || req.user.role !== 'student') {
-    return next(new UnauthorizedError('Student access required'));
-  }
-  next();
+    if (req.user.role !== 'student') {
+        return res.status(403).json({ message: 'Student access required' });
+    }
+    next();
 };
 
 const isParent = (req, res, next) => {
-  if (!req.user || req.user.role !== 'parent') {
-    return next(new UnauthorizedError('Parent access required'));
-  }
-  next();
+    if (req.user.role !== 'parent') {
+        return res.status(403).json({ message: 'Parent access required' });
+    }
+    next();
 };
 
 module.exports = {
-  auth,
-  authorize,
-  isAdmin,
-  isTeacher,
-  isStudent,
-  isParent
+    auth,
+    authorize,
+    isAdmin,
+    isTeacher,
+    isStudent,
+    isParent
 }; 

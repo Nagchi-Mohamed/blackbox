@@ -1,30 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { authenticate, isTeacher } = require('../middleware/auth');
+const { auth, isTeacher } = require('../middleware/auth');
+const interventionController = require('../controllers/interventionController');
 
 // Get all interventions for a student
-router.get('/student/:studentId', authenticate, (req, res) => {
-  res.json({ message: 'Get student interventions endpoint' });
-});
+router.get('/student/:studentId', auth, interventionController.getStudentInterventions);
 
 // Get all interventions for a class
-router.get('/class/:classId', authenticate, isTeacher, (req, res) => {
-  res.json({ message: 'Get class interventions endpoint' });
-});
+router.get('/class/:classId', auth, isTeacher, interventionController.getClassInterventions);
 
 // Create a new intervention
-router.post('/', authenticate, isTeacher, (req, res) => {
-  res.json({ message: 'Create intervention endpoint' });
-});
+router.post('/', auth, isTeacher, interventionController.createIntervention);
 
 // Update an intervention
-router.put('/:id', authenticate, isTeacher, (req, res) => {
-  res.json({ message: 'Update intervention endpoint' });
-});
+router.put('/:id', auth, isTeacher, interventionController.updateIntervention);
 
 // Record intervention effectiveness
-router.post('/:id/effectiveness', authenticate, isTeacher, (req, res) => {
-  res.json({ message: 'Record effectiveness endpoint' });
-});
+router.post('/:id/effectiveness', auth, isTeacher, interventionController.recordEffectiveness);
 
 module.exports = router; 

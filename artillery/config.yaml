@@ -1,0 +1,72 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 20
+      rampTo: 50
+      name: "Ramp up load"
+    - duration: 300
+      arrivalRate: 50
+      name: "Sustained load"
+  environments:
+    local:
+      target: "http://localhost:3000"
+    staging:
+      target: "https://staging.mathsphere.com"
+  processor: "./auth-hook.js"
+
+scenarios:
+  - name: "Security endpoints load test"
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "test@mathsphere.com"
+            password: "securePassword123"
+          capture:
+            json: "$.token"
+            as: "authToken"
+      - get:
+          url: "/api/security/login-history"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - put:
+          url: "/api/security/recovery-options"
+          json:
+            email: "recovery@mathsphere.com"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - get:
+          url: "/api/security/settings"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - post:
+          url: "/api/security/2fa/enable"
+          json:
+            phone: "+1234567890"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - post:
+          url: "/api/security/2fa/verify"
+          json:
+            code: "123456"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - get:
+          url: "/api/security/notifications"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - put:
+          url: "/api/security/notifications"
+          json:
+            newDevice: true
+            loginAttempt: true
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - delete:
+          url: "/api/security/sessions/current"
+          headers:
+            Authorization: "Bearer {{ authToken }}"

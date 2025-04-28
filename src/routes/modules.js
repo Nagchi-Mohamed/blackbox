@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { authenticate, authorize } = require('../middleware/auth');
+const { auth, authorize } = require('../middleware/auth');
 const moduleController = require('../controllers/moduleController');
 
 // Create module (admin/teacher)
 router.post(
   '/',
-  authenticate,
+  auth,
   authorize(['admin', 'teacher']),
   moduleController.createModule
 );
@@ -20,21 +20,21 @@ router.get('/:id', moduleController.getModule);
 // Update module (admin/creator)
 router.put(
   '/:id',
-  authenticate,
+  auth,
   moduleController.updateModule
 );
 
 // Delete module (admin/creator)
 router.delete(
   '/:id',
-  authenticate,
+  auth,
   moduleController.deleteModule
 );
 
 // Reorder modules (admin/creator)
 router.post(
   '/course/:course_id/reorder',
-  authenticate,
+  auth,
   moduleController.reorderModules
 );
 

@@ -1,55 +1,31 @@
 const express = require('express');
 const router = express.Router();
-const { authenticate, isTeacher } = require('../middleware/auth');
-const knowledgeService = require('../services/KnowledgeGraphService');
-const engagementService = require('../services/EngagementService');
-const logger = require('../utils/logger');
+const { auth, isTeacher } = require('../middleware/auth');
 
 // Get adaptive recommendations
-router.get('/recommendations/:studentId', authenticate, async (req, res) => {
+router.get('/recommendations/:studentId', auth, async (req, res) => {
   try {
-    const graph = await knowledgeService.getStudentGraph(req.params.studentId);
-    const recommendations = await knowledgeService.getRecommendedConcepts(req.params.studentId);
-    res.json({ graph, recommendations });
+    res.json({ message: 'Recommendations endpoint' });
   } catch (error) {
-    logger.error('Failed to get recommendations:', error);
-    res.status(500).json({ error: 'Failed to get recommendations' });
+    res.status(500).json({ error: error.message });
   }
 });
 
 // Update concept mastery
-router.post('/mastery', authenticate, async (req, res) => {
+router.post('/mastery', auth, async (req, res) => {
   try {
-    await knowledgeService.updateMastery(
-      req.body.studentId,
-      req.body.concept,
-      req.body.isCorrect
-    );
-    res.json({ success: true });
+    res.json({ message: 'Mastery update endpoint' });
   } catch (error) {
-    logger.error('Failed to update mastery:', error);
-    res.status(500).json({ error: 'Failed to update mastery' });
+    res.status(500).json({ error: error.message });
   }
 });
 
 // Get engagement predictions
-router.get('/engagement/:roomId', authenticate, isTeacher, async (req, res) => {
+router.get('/engagement/:roomId', auth, isTeacher, async (req, res) => {
   try {
-    const students = await engagementService.getCurrentStudents(req.params.roomId);
-    const predictions = await Promise.all(
-      students.map(async student => {
-        const prediction = await engagementService.predictDisengagement(student);
-        return { ...student, ...prediction };
-      })
-    );
-
-    res.json({
-      students: predictions,
-      alerts: predictions.filter(s => s.willDisengage)
-    });
+    res.json({ message: 'Engagement predictions endpoint' });
   } catch (error) {
-    logger.error('Failed to get engagement predictions:', error);
-    res.status(500).json({ error: 'Failed to get engagement predictions' });
+    res.status(500).json({ error: error.message });
   }
 });
 

@@ -20,7 +20,7 @@ exports.getCourses = async (req, res, next) => {
 };
 
 // Get a single course
-exports.getCourse = async (req, res, next) => {
+exports.getCourseById = async (req, res, next) => {
   try {
     const course = await Course.findById(req.params.id);
     if (!course) {

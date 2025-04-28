@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const enrollmentController = require('../controllers/enrollmentController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { auth, authorize } = require('../middleware/auth');
 
 /**
  * @swagger
@@ -34,7 +34,7 @@ const { authenticate, authorize } = require('../middleware/auth');
  *         description: Unauthorized
  */
 router.post('/courses/:course_id/enroll', 
-  authenticate, 
+  auth, 
   enrollmentController.enrollInCourse
 );
 
@@ -53,7 +53,7 @@ router.post('/courses/:course_id/enroll',
  *         description: Unauthorized
  */
 router.get('/enrollments', 
-  authenticate, 
+  auth, 
   enrollmentController.getUserEnrollments
 );
 
@@ -95,7 +95,7 @@ router.get('/enrollments',
  *         description: Enrollment not found
  */
 router.patch('/enrollments/:enrollment_id', 
-  authenticate, 
+  auth, 
   enrollmentController.updateEnrollmentStatus
 );
 
@@ -123,7 +123,7 @@ router.patch('/enrollments/:enrollment_id',
  *         description: Not authorized to view enrollments
  */
 router.get('/courses/:course_id/enrollments', 
-  authenticate, 
+  auth, 
   enrollmentController.getCourseEnrollments
 );
 

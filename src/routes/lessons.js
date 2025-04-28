@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticate, authorize } = require('../middleware/auth');
+const { auth, authorize } = require('../middleware/auth');
 const lessonController = require('../controllers/lessonController');
 const upload = require('../middleware/upload');
 const validate = require('../middleware/validate');
@@ -9,7 +9,7 @@ const { createLesson: createSchema, updateLesson: updateSchema, reorderLessons: 
 // Create new lesson
 router.post(
   '/',
-  authenticate,
+  auth,
   authorize(['admin', 'teacher']),
   validate(createSchema),
   upload.lessonContent.single('content_file'),
@@ -32,7 +32,7 @@ router.get(
 // Update lesson
 router.put(
   '/:id',
-  authenticate,
+  auth,
   validate(updateSchema),
   upload.lessonContent.single('content_file'),
   lessonController.updateLesson
@@ -41,14 +41,14 @@ router.put(
 // Delete lesson
 router.delete(
   '/:id',
-  authenticate,
+  auth,
   lessonController.deleteLesson
 );
 
 // Reorder lessons
 router.post(
   '/module/:module_id/reorder',
-  authenticate,
+  auth,
   validate(reorderSchema),
   lessonController.reorderLessons
 );

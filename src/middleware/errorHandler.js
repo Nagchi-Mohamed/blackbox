@@ -1,4 +1,4 @@
-const logger = require('../config/logger');
+const logger = require('../utils/logger');
 const ApiError = require('../utils/ApiError');
 
 class AppError extends Error {
@@ -16,20 +16,51 @@ class AppError extends Error {
  * Error handling middleware
  */
 const errorHandler = (err, req, res, next) => {
-  // If err is not an instance of ApiError, convert it
-  if (!(err instanceof ApiError)) {
-    const statusCode = err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
-    err = new ApiError(statusCode, message, false);
+  // Log the error
+  logger.error('Error:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method
+  });
+
+  // Handle specific error types
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      message: 'Validation Error',
+      errors: Object.values(err.errors).map(e => e.message)
+    });
   }
 
-  const response = {
-    success: false,
-    message: err.message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  };
+  if (err.name === 'CastError') {
+    return res.status(400).json({
+      message: 'Invalid ID format'
+    });
+  }
 
-  res.status(err.statusCode).json(response);
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      message: 'Invalid token'
+    });
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    return res.status(401).json({
+      message: 'Token expired'
+    });
+  }
+
+  // Handle mongoose duplicate key error
+  if (err.code === 11000) {
+    return res.status(400).json({
+      message: 'Duplicate field value entered'
+    });
+  }
+
+  // Default error response
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal server error'
+  });
 };
 
 module.exports = errorHandler; 
