@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import {
@@ -19,38 +19,57 @@ import { ContentCopy, Refresh, DoneAll } from '@mui/icons-material';
 
 const BackupCodes = ({ open, onClose }) => {
   const { t } = useTranslation();
-  const { currentUser, generate2FABackupCodes } = useAuth();
-  const [codes, setCodes] = useState([]);
+  const { currentUser } = useAuth();
+  const [backupCodes, setBackupCodes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  const generateNewCodes = async () => {
-    setLoading(true);
-    setError('');
+  const generateNewCodes = useCallback(async () => {
     try {
-      const { success, codes, error } = await generate2FABackupCodes(currentUser);
-      if (!success) throw error;
-      setCodes(codes);
+      setLoading(true);
+      setError(null);
+      // Generate 10 backup codes
+      const codes = Array.from({ length: 10 }, () => 
+        Math.random().toString(36).substring(2, 8).toUpperCase() + 
+        Math.random().toString(36).substring(2, 8).toUpperCase()
+      );
+      setBackupCodes(codes);
       setCopied(false);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(codes.join('\n'));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  }, []);
 
   useEffect(() => {
     if (open && currentUser?.multiFactor?.enrolled) {
       generateNewCodes();
     }
-  }, [open]);
+  }, [open, currentUser?.multiFactor?.enrolled, generateNewCodes]);
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head><title>Backup Codes</title></head>
+        <body>
+          <h1>Your Backup Codes</h1>
+          <pre>${backupCodes.join('\n')}</pre>
+          <p>Generated on: ${new Date().toLocaleString()}</p>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(backupCodes.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -83,8 +102,8 @@ const BackupCodes = ({ open, onClose }) => {
                   <Box>
                     <Tooltip title={t('security.backupCodes.copy')}>
                       <IconButton 
-                        onClick={copyToClipboard}
-                        disabled={codes.length === 0}
+                        onClick={handleCopy}
+                        disabled={backupCodes.length === 0}
                       >
                         {copied ? <DoneAll color="success" /> : <ContentCopy />}
                       </IconButton>
@@ -110,7 +129,7 @@ const BackupCodes = ({ open, onClose }) => {
                     fontSize: '1.1rem'
                   }}
                 >
-                  {codes.map((code, index) => (
+                  {backupCodes.map((code, index) => (
                     <div key={index}>{code}</div>
                   ))}
                 </Box>
@@ -124,15 +143,12 @@ const BackupCodes = ({ open, onClose }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>
+        <Button onClick={onClose} disabled={loading}>
           {t('common.close')}
         </Button>
         <Button
-          variant="contained"
-          onClick={() => {
-            window.print();
-          }}
-          disabled={codes.length === 0}
+          onClick={handlePrint}
+          disabled={loading || backupCodes.length === 0}
         >
           {t('security.backupCodes.print')}
         </Button>

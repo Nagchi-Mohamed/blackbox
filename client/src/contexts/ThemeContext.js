@@ -1,52 +1,63 @@
-import { createContext, useContext, useMemo, useState } from 'react';
-import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import { arSA, enUS, frFR } from '@mui/material/locale';
+import React, { createContext, useContext, useState, useMemo } from 'react';
+import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 const ThemeContext = createContext();
 
-export const ThemeProvider = ({ children }) => {
+const ThemeProvider = ({ children }) => {
+  const { i18n } = useTranslation();
   const [mode, setMode] = useState('light');
-  const [language, setLanguage] = useState('en');
-  
-  const toggleTheme = () => {
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+          primary: {
+            main: '#1976d2',
+          },
+          secondary: {
+            main: '#dc004e',
+          },
+        },
+        direction: i18n.dir(),
+        typography: {
+          fontFamily: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+          ].join(','),
+        },
+      }),
+    [mode, i18n]
+  );
+
+  const toggleMode = () => {
     setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
   };
 
-  const getLocale = () => {
-    switch(language) {
-      case 'ar': return arSA;
-      case 'fr': return frFR;
-      default: return enUS;
-    }
-  };
-
-  const theme = useMemo(() => createTheme({
-    direction: language === 'ar' ? 'rtl' : 'ltr',
-    palette: {
-      mode,
-      primary: {
-        main: mode === 'light' ? '#1976d2' : '#90caf9',
-      },
-      secondary: {
-        main: mode === 'light' ? '#9c27b0' : '#ce93d8',
-      },
-      background: {
-        default: mode === 'light' ? '#f5f5f5' : '#121212',
-        paper: mode === 'light' ? '#ffffff' : '#1e1e1e',
-      },
-    },
-    typography: {
-      fontFamily: language === 'ar' 
-        ? '"Tajawal", "Arial", sans-serif'
-        : '"Roboto", "Helvetica", "Arial", sans-serif',
-    },
-  }, getLocale()), [mode, language]);
-
   return (
-    <ThemeContext.Provider value={{ toggleTheme, mode, setLanguage }}>
-      <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>
+    <ThemeContext.Provider value={{ mode, toggleMode }}>
+      <MuiThemeProvider theme={theme}>
+        {children}
+      </MuiThemeProvider>
     </ThemeContext.Provider>
   );
 };
 
-export const useTheme = () => useContext(ThemeContext); 
+const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+};
+
+export { ThemeProvider, useTheme }; 

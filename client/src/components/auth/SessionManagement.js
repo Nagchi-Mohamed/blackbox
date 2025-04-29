@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Paper,
@@ -6,124 +6,118 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
+  ListItemSecondaryAction,
   IconButton,
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
-  Alert,
   Box,
-  Chip,
-  Divider
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import {
-  Computer,
-  Phone,
-  Tablet,
-  Public,
-  AccessTime,
-  Logout,
-  Warning
+  Computer as DesktopIcon,
+  Phone as MobileIcon,
+  Tablet as TabletIcon,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
 
 const SessionManagement = () => {
   const { t } = useTranslation();
-  const { currentUser, logout } = useAuth();
   const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [confirmDialog, setConfirmDialog] = useState({
-    open: false,
-    sessionId: null,
-    action: null
-  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [showLogoutAllDialog, setShowLogoutAllDialog] = useState(false);
 
-  useEffect(() => {
-    fetchSessions();
-  }, []);
-
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try {
-      // In a real app, this would be an API call to your backend
+      setLoading(true);
+      setError(null);
+      // Add your API call here to fetch sessions
       const mockSessions = [
         {
-          id: '1',
-          device: 'Chrome on Windows',
-          location: 'New York, USA',
+          id: 1,
+          device: 'Desktop (Chrome)',
+          location: 'New York, US',
           lastActive: new Date(),
-          isCurrent: true,
-          type: 'desktop'
+          current: true
         },
         {
-          id: '2',
-          device: 'Safari on iPhone',
+          id: 2,
+          device: 'Mobile (Safari)',
           location: 'London, UK',
-          lastActive: new Date(Date.now() - 3600000),
-          isCurrent: false,
-          type: 'mobile'
+          lastActive: new Date(Date.now() - 86400000),
+          current: false
         }
       ];
       setSessions(mockSessions);
     } catch (err) {
-      setError(t('security.sessions.fetchError'));
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
+
+  const handleLogout = async (sessionId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      // Add your API call here to logout session
+      setSessions(sessions.filter(session => session.id !== sessionId));
+      setShowLogoutDialog(false);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogoutSession = async (sessionId) => {
-    setConfirmDialog({
-      open: true,
-      sessionId,
-      action: 'logout'
-    });
-  };
-
-  const handleLogoutAll = () => {
-    setConfirmDialog({
-      open: true,
-      sessionId: null,
-      action: 'logoutAll'
-    });
-  };
-
-  const confirmAction = async () => {
+  const handleLogoutAll = async () => {
     try {
-      if (confirmDialog.action === 'logoutAll') {
-        await logout();
-      } else {
-        // In a real app, this would be an API call to your backend
-        setSessions(sessions.filter(s => s.id !== confirmDialog.sessionId));
-      }
+      setLoading(true);
+      setError(null);
+      // Add your API call here to logout all sessions
+      setSessions(sessions.filter(session => session.current));
+      setShowLogoutAllDialog(false);
     } catch (err) {
-      setError(t('security.sessions.actionError'));
+      setError(err.message);
     } finally {
-      setConfirmDialog({ open: false, sessionId: null, action: null });
+      setLoading(false);
     }
   };
 
-  const getDeviceIcon = (type) => {
-    switch (type) {
-      case 'desktop':
-        return <Computer />;
-      case 'mobile':
-        return <Phone />;
-      case 'tablet':
-        return <Tablet />;
-      default:
-        return <Computer />;
+  const getDeviceIcon = (device) => {
+    if (device.toLowerCase().includes('mobile')) {
+      return <MobileIcon />;
+    } else if (device.toLowerCase().includes('tablet')) {
+      return <TabletIcon />;
     }
+    return <DesktopIcon />;
   };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" p={3}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
       <Typography variant="h6" gutterBottom>
         {t('security.sessions.title')}
       </Typography>
-      
+
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
@@ -132,93 +126,93 @@ const SessionManagement = () => {
 
       <List>
         {sessions.map((session) => (
-          <React.Fragment key={session.id}>
-            <ListItem
-              secondaryAction={
-                !session.isCurrent && (
-                  <IconButton
-                    edge="end"
-                    onClick={() => handleLogoutSession(session.id)}
-                  >
-                    <Logout />
-                  </IconButton>
-                )
-              }
-            >
-              <ListItemIcon>
-                {getDeviceIcon(session.type)}
-              </ListItemIcon>
+          <ListItem key={session.id}>
+            <Box display="flex" alignItems="center" gap={1}>
+              {getDeviceIcon(session.device)}
               <ListItemText
-                primary={
-                  <Box display="flex" alignItems="center" gap={1}>
-                    {session.device}
-                    {session.isCurrent && (
-                      <Chip
-                        label={t('security.sessions.current')}
-                        size="small"
-                        color="primary"
-                      />
-                    )}
-                  </Box>
-                }
-                secondary={
-                  <>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Public fontSize="small" />
-                      {session.location}
-                    </Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <AccessTime fontSize="small" />
-                      {new Date(session.lastActive).toLocaleString()}
-                    </Box>
-                  </>
-                }
+                primary={session.device}
+                secondary={`${session.location} • ${new Date(session.lastActive).toLocaleString()}`}
               />
-            </ListItem>
-            <Divider />
-          </React.Fragment>
+            </Box>
+            <ListItemSecondaryAction>
+              {!session.current && (
+                <IconButton
+                  edge="end"
+                  onClick={() => {
+                    setSelectedSession(session);
+                    setShowLogoutDialog(true);
+                  }}
+                  disabled={loading}
+                >
+                  <LogoutIcon />
+                </IconButton>
+              )}
+              {session.current && (
+                <Typography variant="caption" color="text.secondary">
+                  {t('security.sessions.current')}
+                </Typography>
+              )}
+            </ListItemSecondaryAction>
+          </ListItem>
         ))}
       </List>
 
-      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+      {sessions.length > 1 && (
         <Button
           variant="outlined"
           color="error"
-          onClick={handleLogoutAll}
-          startIcon={<Warning />}
+          onClick={() => setShowLogoutAllDialog(true)}
+          disabled={loading}
+          sx={{ mt: 2 }}
         >
           {t('security.sessions.logoutAll')}
         </Button>
-      </Box>
+      )}
 
       <Dialog
-        open={confirmDialog.open}
-        onClose={() => setConfirmDialog({ open: false, sessionId: null, action: null })}
+        open={showLogoutDialog}
+        onClose={() => setShowLogoutDialog(false)}
       >
-        <DialogTitle>
-          {confirmDialog.action === 'logoutAll'
-            ? t('security.sessions.confirmLogoutAll')
-            : t('security.sessions.confirmLogout')}
-        </DialogTitle>
+        <DialogTitle>{t('security.sessions.confirmLogout')}</DialogTitle>
         <DialogContent>
-          <Typography>
-            {confirmDialog.action === 'logoutAll'
-              ? t('security.sessions.logoutAllWarning')
-              : t('security.sessions.logoutWarning')}
-          </Typography>
+          <DialogContentText>
+            {t('security.sessions.logoutWarning')}
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => setConfirmDialog({ open: false, sessionId: null, action: null })}
-          >
+          <Button onClick={() => setShowLogoutDialog(false)}>
             {t('common.cancel')}
           </Button>
           <Button
-            onClick={confirmAction}
+            onClick={() => handleLogout(selectedSession?.id)}
             color="error"
-            variant="contained"
+            disabled={loading}
           >
-            {t('common.confirm')}
+            {loading ? <CircularProgress size={24} /> : t('common.confirm')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={showLogoutAllDialog}
+        onClose={() => setShowLogoutAllDialog(false)}
+      >
+        <DialogTitle>{t('security.sessions.confirmLogoutAll')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {t('security.sessions.logoutAllWarning')}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowLogoutAllDialog(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            onClick={handleLogoutAll}
+            color="error"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : t('common.confirm')}
           </Button>
         </DialogActions>
       </Dialog>

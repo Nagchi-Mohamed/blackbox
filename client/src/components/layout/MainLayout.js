@@ -1,146 +1,167 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../contexts/ThemeContext';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  IconButton,
+  Typography,
+  Menu,
+  MenuItem,
+  Avatar,
+  Button
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  AccountCircle,
+  Notifications
+} from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
-import { AppBar, Toolbar, IconButton, Typography, Box, Drawer, List, ListItem, ListItemText, Divider, Menu, MenuItem, Avatar, Button, CssBaseline } from '@mui/material';
-import { Menu as MenuIcon, Notifications } from '@mui/icons-material';
-import { Outlet, useNavigate } from 'react-router-dom';
-import LanguageSelector from '../common/LanguageSelector';
-import ThemeToggle from '../common/ThemeToggle';
+import { useTranslation } from 'react-i18next';
 
-const MainLayout = () => {
+const MainLayout = ({ children }) => {
   const { t } = useTranslation();
-  const { mode } = useTheme();
-  const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const { currentUser, logout } = useAuth();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [mobileMenuAnchorEl, setMobileMenuAnchorEl] = React.useState(null);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const handleProfileMenuOpen = (event) => {
+  const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
+  const handleMobileMenu = (event) => {
+    setMobileMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/auth');
+  const handleMobileMenuClose = () => {
+    setMobileMenuAnchorEl(null);
   };
 
-  const drawer = (
-    <div>
-      <Toolbar />
-      <Divider />
-      <List>
-        {['home', 'courses', 'exercises', 'forum', 'classroom', 'social'].map((text) => (
-          <ListItem button key={text}>
-            <ListItemText primary={t(`navigation.${text}`)} />
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  );
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <CssBaseline />
-      <AppBar position="fixed" elevation={0}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <AppBar position="static">
         <Toolbar>
           <IconButton
-            color="inherit"
             edge="start"
-            onClick={handleDrawerToggle}
+            color="inherit"
+            aria-label="menu"
+            onClick={handleMobileMenu}
             sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            MathSphere
+
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, cursor: 'pointer' }}
+            onClick={() => navigate('/')}
+          >
+            {t('common.welcome')}
           </Typography>
-          <ThemeToggle />
-          <LanguageSelector />
-          {currentUser ? (
-            <>
-              <IconButton color="inherit">
-                <Notifications />
-              </IconButton>
-              <IconButton
-                edge="end"
-                color="inherit"
-                onClick={handleProfileMenuOpen}
-              >
-                <Avatar 
-                  src={currentUser.photoURL} 
-                  alt={currentUser.displayName}
-                  sx={{ width: 32, height: 32 }}
-                />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-              >
-                <MenuItem onClick={() => navigate('/profile')}>
-                  {t('user.profile')}
-                </MenuItem>
-                <MenuItem onClick={() => navigate('/security')}>
-                  {t('user.security')}
-                </MenuItem>
-                <MenuItem onClick={() => navigate('/settings')}>
-                  {t('user.settings')}
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  {t('user.logout')}
-                </MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <Button 
-              color="inherit" 
-              onClick={() => navigate('/auth')}
-            >
-              {t('auth.login')}
+
+          <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
+            <Button color="inherit" onClick={() => navigate('/classroom')}>
+              {t('navigation.classroom')}
             </Button>
-          )}
+            <Button color="inherit" onClick={() => navigate('/exercises')}>
+              {t('navigation.exercises')}
+            </Button>
+          </Box>
+
+          <IconButton color="inherit">
+            <Notifications />
+          </IconButton>
+
+          <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenu}
+            color="inherit"
+          >
+            {currentUser?.photoURL ? (
+              <Avatar
+                src={currentUser.photoURL}
+                alt={currentUser.displayName}
+                sx={{ width: 32, height: 32 }}
+              />
+            ) : (
+              <AccountCircle />
+            )}
+          </IconButton>
         </Toolbar>
       </AppBar>
-      
-      <Box
-        component="nav"
-        sx={{ width: { sm: 240 }, flexShrink: { sm: 0 } }}
+
+      <Menu
+        id="menu-appbar"
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
       >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-      
-      <Box component="main" sx={{ flexGrow: 1, p: 3, pt: 10 }}>
-        <Outlet />
+        <MenuItem onClick={() => { handleClose(); navigate('/profile'); }}>
+          {t('user.profile')}
+        </MenuItem>
+        <MenuItem onClick={() => { handleClose(); navigate('/security'); }}>
+          {t('user.security')}
+        </MenuItem>
+        <MenuItem onClick={() => { handleClose(); navigate('/settings'); }}>
+          {t('user.settings')}
+        </MenuItem>
+        <MenuItem onClick={() => { handleClose(); handleLogout(); }}>
+          {t('user.logout')}
+        </MenuItem>
+      </Menu>
+
+      <Menu
+        id="mobile-menu"
+        anchorEl={mobileMenuAnchorEl}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={Boolean(mobileMenuAnchorEl)}
+        onClose={handleMobileMenuClose}
+      >
+        <MenuItem onClick={() => { handleMobileMenuClose(); navigate('/classroom'); }}>
+          {t('navigation.classroom')}
+        </MenuItem>
+        <MenuItem onClick={() => { handleMobileMenuClose(); navigate('/exercises'); }}>
+          {t('navigation.exercises')}
+        </MenuItem>
+      </Menu>
+
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        {children}
       </Box>
     </Box>
   );

@@ -16,13 +16,14 @@ import AdminPage from './pages/AdminPage';
 import TeacherPage from './pages/TeacherPage';
 import './lib/i18n';
 import './App.css';
+import FirebaseTest from './components/FirebaseTest';
 
 function App() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
     document.body.dir = i18n.dir();
-  }, [i18n.language]);
+  }, [i18n]);
 
   return (
     <ThemeProvider>
@@ -55,6 +56,7 @@ function App() {
               <Route path="*" element={<div>404 - Page Not Found</div>} />
             </Routes>
           </MainLayout>
+          <FirebaseTest />
         </Router>
       </AuthProvider>
     </ThemeProvider>

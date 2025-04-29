@@ -1,204 +1,173 @@
-import { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Box, Button, Grid, IconButton, Paper, Typography, Tooltip } from '@mui/material';
-import { Mic, MicOff, Videocam, VideocamOff, ScreenShare, StopScreenShare, PresentToAll, Chat, People, Settings } from '@mui/icons-material';
+import React, { useRef, useEffect, useState } from 'react';
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  TextField,
+  Divider
+} from '@mui/material';
+import {
+  Mic,
+  MicOff,
+  Videocam,
+  VideocamOff,
+  ScreenShare,
+  StopScreenShare,
+  Send
+} from '@mui/icons-material';
 
-const VirtualClassroom = ({ roomId }) => {
-  const { t } = useTranslation();
-  const [audioEnabled, setAudioEnabled] = useState(false);
-  const [videoEnabled, setVideoEnabled] = useState(false);
-  const [screenSharing, setScreenSharing] = useState(false);
-  const [whiteboardOpen, setWhiteboardOpen] = useState(false);
+const VirtualClassroom = () => {
   const videoRef = useRef(null);
-  const screenRef = useRef(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [message, setMessage] = useState('');
+  const [chatMessages, setChatMessages] = useState([]);
 
   useEffect(() => {
-    // Initialize media devices
-    const initDevices = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: true
+    const videoElement = videoRef.current;
+    if (videoElement) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+          videoElement.srcObject = stream;
+        })
+        .catch(err => {
+          console.error('Error accessing media devices:', err);
         });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (err) {
-        console.error('Error accessing media devices:', err);
-      }
-    };
-
-    initDevices();
+    }
 
     return () => {
-      // Cleanup
-      if (videoRef.current && videoRef.current.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      if (videoElement && videoElement.srcObject) {
+        const tracks = videoElement.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
       }
     };
   }, []);
 
-  const toggleAudio = () => {
+  const handleToggleMute = () => {
+    setIsMuted(!isMuted);
     if (videoRef.current && videoRef.current.srcObject) {
-      const audioTracks = videoRef.current.srcObject.getAudioTracks();
-      audioTracks.forEach(track => {
-        track.enabled = !track.enabled;
-      });
-      setAudioEnabled(!audioEnabled);
+      const audioTrack = videoRef.current.srcObject.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = isMuted;
+      }
     }
   };
 
-  const toggleVideo = () => {
+  const handleToggleVideo = () => {
+    setIsVideoOff(!isVideoOff);
     if (videoRef.current && videoRef.current.srcObject) {
-      const videoTracks = videoRef.current.srcObject.getVideoTracks();
-      videoTracks.forEach(track => {
-        track.enabled = !track.enabled;
-      });
-      setVideoEnabled(!videoEnabled);
+      const videoTrack = videoRef.current.srcObject.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = isVideoOff;
+      }
     }
   };
 
-  const toggleScreenShare = async () => {
+  const handleToggleScreenShare = async () => {
     try {
-      if (!screenSharing) {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({
-          video: true,
-          audio: true
-        });
-        if (screenRef.current) {
-          screenRef.current.srcObject = screenStream;
+      if (!isScreenSharing) {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
         }
-        setScreenSharing(true);
-        
-        // Handle when user stops screen sharing from browser controls
-        screenStream.getVideoTracks()[0].onended = () => {
-          setScreenSharing(false);
-        };
+        setIsScreenSharing(true);
       } else {
-        if (screenRef.current && screenRef.current.srcObject) {
-          screenRef.current.srcObject.getTracks().forEach(track => track.stop());
-          screenRef.current.srcObject = null;
+        if (videoRef.current && videoRef.current.srcObject) {
+          const tracks = videoRef.current.srcObject.getTracks();
+          tracks.forEach(track => track.stop());
         }
-        setScreenSharing(false);
+        setIsScreenSharing(false);
       }
     } catch (err) {
       console.error('Error sharing screen:', err);
     }
   };
 
+  const handleSendMessage = () => {
+    if (message.trim()) {
+      setChatMessages([...chatMessages, { text: message, sender: 'You' }]);
+      setMessage('');
+    }
+  };
+
   return (
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h5" sx={{ p: 2, borderBottom: '1px solid #ddd' }}>
-        {t('Classroom')}: {roomId}
-      </Typography>
-      
-      <Grid container sx={{ flexGrow: 1 }}>
-        {/* Main Content Area */}
-        <Grid item xs={12} md={9} sx={{ p: 2 }}>
-          <Paper sx={{ height: '100%', position: 'relative', backgroundColor: '#f5f5f5' }}>
-            {screenSharing ? (
-              <video
-                ref={screenRef}
-                autoPlay
-                playsInline
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
-            ) : (
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            )}
-            
-            {/* User video thumbnail */}
-            {screenSharing && (
-              <Box sx={{ position: 'absolute', bottom: 16, right: 16, width: '20%', minWidth: 150 }}>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  style={{ width: '100%', borderRadius: 8 }}
-                />
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-        
-        {/* Sidebar */}
-        <Grid item xs={12} md={3} sx={{ p: 2, borderLeft: '1px solid #ddd' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            {/* Participants */}
-            <Paper sx={{ p: 2, mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                <People sx={{ verticalAlign: 'middle', mr: 1 }} />
-                {t('Participants')} (4)
-              </Typography>
-              {/* List of participants would go here */}
-            </Paper>
-            
-            {/* Chat */}
-            <Paper sx={{ p: 2, flexGrow: 1, mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                <Chat sx={{ verticalAlign: 'middle', mr: 1 }} />
-                {t('Chat')}
-              </Typography>
-              {/* Chat messages would go here */}
-            </Paper>
+    <Grid container spacing={2} sx={{ height: '100vh', p: 2 }}>
+      <Grid item xs={12} md={9}>
+        <Paper sx={{ height: '100%', position: 'relative' }}>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              p: 2,
+              bgcolor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 2
+            }}
+          >
+            <IconButton onClick={handleToggleMute} color="primary">
+              {isMuted ? <MicOff /> : <Mic />}
+            </IconButton>
+            <IconButton onClick={handleToggleVideo} color="primary">
+              {isVideoOff ? <VideocamOff /> : <Videocam />}
+            </IconButton>
+            <IconButton onClick={handleToggleScreenShare} color="primary">
+              {isScreenSharing ? <StopScreenShare /> : <ScreenShare />}
+            </IconButton>
           </Box>
-        </Grid>
+        </Paper>
       </Grid>
-      
-      {/* Controls */}
-      <Box sx={{ p: 2, borderTop: '1px solid #ddd', display: 'flex', justifyContent: 'center' }}>
-        <Tooltip title={audioEnabled ? t('Mute') : t('Unmute')}>
-          <IconButton
-            color={audioEnabled ? 'primary' : 'default'}
-            onClick={toggleAudio}
-            sx={{ mx: 1 }}
-          >
-            {audioEnabled ? <Mic /> : <MicOff />}
-          </IconButton>
-        </Tooltip>
-        
-        <Tooltip title={videoEnabled ? t('Stop Video') : t('Start Video')}>
-          <IconButton
-            color={videoEnabled ? 'primary' : 'default'}
-            onClick={toggleVideo}
-            sx={{ mx: 1 }}
-          >
-            {videoEnabled ? <Videocam /> : <VideocamOff />}
-          </IconButton>
-        </Tooltip>
-        
-        <Tooltip title={screenSharing ? t('Stop Sharing') : t('Share Screen')}>
-          <IconButton
-            color={screenSharing ? 'primary' : 'default'}
-            onClick={toggleScreenShare}
-            sx={{ mx: 1 }}
-          >
-            {screenSharing ? <StopScreenShare /> : <ScreenShare />}
-          </IconButton>
-        </Tooltip>
-        
-        <Tooltip title={t('Whiteboard')}>
-          <IconButton
-            color={whiteboardOpen ? 'primary' : 'default'}
-            onClick={() => setWhiteboardOpen(!whiteboardOpen)}
-            sx={{ mx: 1 }}
-          >
-            <PresentToAll />
-          </IconButton>
-        </Tooltip>
-        
-        <Button variant="contained" color="error" sx={{ ml: 2 }}>
-          {t('Leave')}
-        </Button>
-      </Box>
-    </Box>
+      <Grid item xs={12} md={3}>
+        <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+            <Typography variant="h6">Chat</Typography>
+          </Box>
+          <List sx={{ flexGrow: 1, overflow: 'auto' }}>
+            {chatMessages.map((msg, index) => (
+              <ListItem key={index}>
+                <ListItemAvatar>
+                  <Avatar>{msg.sender[0]}</Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={msg.sender}
+                  secondary={msg.text}
+                />
+              </ListItem>
+            ))}
+          </List>
+          <Divider />
+          <Box sx={{ p: 2, display: 'flex', gap: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Type a message..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            />
+            <IconButton onClick={handleSendMessage} color="primary">
+              <Send />
+            </IconButton>
+          </Box>
+        </Paper>
+      </Grid>
+    </Grid>
   );
 };
 

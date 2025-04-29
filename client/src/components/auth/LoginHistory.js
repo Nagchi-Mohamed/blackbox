@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import {
@@ -12,7 +12,6 @@ import {
   Typography,
   Box,
   CircularProgress,
-  Chip,
   Tooltip,
   Alert
 } from '@mui/material';
@@ -20,124 +19,130 @@ import {
   DesktopWindows as DesktopIcon,
   PhoneIphone as MobileIcon,
   Tablet as TabletIcon,
-  Warning as WarningIcon,
-  CheckCircle as SuccessIcon
+  CheckCircle as SuccessIcon,
+  Cancel as FailureIcon
 } from '@mui/icons-material';
 
 const LoginHistory = () => {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loginHistory, setLoginHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchLoginHistory = async () => {
+      if (!currentUser) return;
+      
       try {
-        // In a real app, you would fetch from your backend
-        const mockData = [
+        setLoading(true);
+        setError(null);
+        // Add your API call here to fetch login history
+        const mockHistory = [
           {
             id: 1,
-            timestamp: new Date(Date.now() - 1000 * 60 * 5),
-            deviceType: 'desktop',
-            location: 'New York, NY',
-            ipAddress: '192.168.1.1',
-            success: true
+            date: new Date(),
+            device: 'Desktop (Chrome)',
+            location: 'New York, US',
+            ip: '192.168.1.1',
+            status: 'success'
           },
           {
             id: 2,
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-            deviceType: 'mobile',
-            location: 'San Francisco, CA',
-            ipAddress: '10.0.0.1',
-            success: true
-          },
-          {
-            id: 3,
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-            deviceType: 'tablet',
+            date: new Date(Date.now() - 86400000),
+            device: 'Mobile (Safari)',
             location: 'London, UK',
-            ipAddress: '172.16.0.1',
-            success: false
+            ip: '192.168.1.2',
+            status: 'failure'
           }
         ];
-        setHistory(mockData);
+        setLoginHistory(mockHistory);
       } catch (err) {
-        setError(t('errors.fetchFailed'));
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchLoginHistory();
-  }, [currentUser]);
+  }, [currentUser, t]);
 
-  const getDeviceIcon = (type) => {
-    switch (type) {
-      case 'desktop': return <DesktopIcon fontSize="small" />;
-      case 'mobile': return <MobileIcon fontSize="small" />;
-      case 'tablet': return <TabletIcon fontSize="small" />;
-      default: return <DesktopIcon fontSize="small" />;
+  const getDeviceIcon = (device) => {
+    if (device.toLowerCase().includes('mobile')) {
+      return <MobileIcon />;
+    } else if (device.toLowerCase().includes('tablet')) {
+      return <TabletIcon />;
     }
+    return <DesktopIcon />;
   };
 
+  const getStatusIcon = (status) => {
+    return status === 'success' ? (
+      <SuccessIcon color="success" />
+    ) : (
+      <FailureIcon color="error" />
+    );
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" p={3}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert severity="error" sx={{ mb: 2 }}>
+        {error}
+      </Alert>
+    );
+  }
+
   return (
-    <Paper elevation={2} sx={{ p: 3, mt: 4 }}>
-      <Typography variant="h5" gutterBottom>
+    <Paper sx={{ p: 3, mb: 3 }}>
+      <Typography variant="h6" gutterBottom>
         {t('security.loginHistory.title')}
       </Typography>
       
-      {loading ? (
-        <Box display="flex" justifyContent="center" p={4}>
-          <CircularProgress />
-        </Box>
-      ) : error ? (
-        <Alert severity="error">{error}</Alert>
-      ) : (
-        <TableContainer component={Paper} variant="outlined">
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>{t('security.loginHistory.date')}</TableCell>
-                <TableCell>{t('security.loginHistory.device')}</TableCell>
-                <TableCell>{t('security.loginHistory.location')}</TableCell>
-                <TableCell>{t('security.loginHistory.ip')}</TableCell>
-                <TableCell>{t('security.loginHistory.status')}</TableCell>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>{t('security.loginHistory.date')}</TableCell>
+              <TableCell>{t('security.loginHistory.device')}</TableCell>
+              <TableCell>{t('security.loginHistory.location')}</TableCell>
+              <TableCell>{t('security.loginHistory.ip')}</TableCell>
+              <TableCell>{t('security.loginHistory.status')}</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loginHistory.map((login) => (
+              <TableRow key={login.id}>
+                <TableCell>
+                  {new Date(login.date).toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    {getDeviceIcon(login.device)}
+                    {login.device}
+                  </Box>
+                </TableCell>
+                <TableCell>{login.location}</TableCell>
+                <TableCell>
+                  <Tooltip title={t('security.loginHistory.ipTooltip')}>
+                    <span>{login.ip}</span>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  {getStatusIcon(login.status)}
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {history.map((entry) => (
-                <TableRow key={entry.id}>
-                  <TableCell>
-                    {entry.timestamp.toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
-                      {getDeviceIcon(entry.deviceType)}
-                      <Box ml={1}>
-                        {t(`security.loginHistory.devices.${entry.deviceType}`)}
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{entry.location}</TableCell>
-                  <TableCell>
-                    <Tooltip title={t('security.loginHistory.ipTooltip')}>
-                      <Chip label={entry.ipAddress} size="small" />
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
-                    {entry.success ? (
-                      <SuccessIcon color="success" />
-                    ) : (
-                      <WarningIcon color="error" />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Paper>
   );
 };
