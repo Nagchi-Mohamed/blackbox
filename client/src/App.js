@@ -12,11 +12,9 @@ import Classroom from './pages/Classroom';
 import Exercises from './pages/Exercises';
 import ProfilePage from './pages/ProfilePage';
 import SecuritySettings from './pages/SecuritySettings';
-import AdminPage from './pages/AdminPage';
-import TeacherPage from './pages/TeacherPage';
+import TeacherDashboard from './features/teacher/TeacherDashboard';
 import './lib/i18n';
 import './App.css';
-import FirebaseTest from './components/FirebaseTest';
 
 function App() {
   const { i18n } = useTranslation();
@@ -38,25 +36,16 @@ function App() {
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
               <Route 
-                path="/admin" 
-                element={
-                  <RoleRoute requiredRoles={{ isAdmin: true }}>
-                    <AdminPage />
-                  </RoleRoute>
-                } 
-              />
-              <Route 
                 path="/teacher" 
                 element={
                   <RoleRoute requiredRoles={{ isTeacher: true }}>
-                    <TeacherPage />
+                    <TeacherDashboard />
                   </RoleRoute>
                 } 
               />
               <Route path="*" element={<div>404 - Page Not Found</div>} />
             </Routes>
           </MainLayout>
-          <FirebaseTest />
         </Router>
       </AuthProvider>
     </ThemeProvider>

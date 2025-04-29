@@ -1,0 +1,52 @@
+{
+  "common": {
+    "welcome": "Bienvenue sur BrainyMath",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "success": "Succès!",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "submit": "Soumettre"
+  },
+  "auth": {
+    "login": "Connexion",
+    "signup": "Inscription",
+    "logout": "Déconnexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "resetPassword": "Réinitialiser le mot de passe"
+  },
+  "classroom": {
+    "title": "Salle de classe",
+    "join": "Rejoindre la classe",
+    "leave": "Quitter la classe",
+    "participants": "Participants",
+    "chat": "Chat",
+    "whiteboard": "Tableau blanc",
+    "tools": {
+      "pen": "Stylo",
+      "eraser": "Gomme",
+      "select": "Sélectionner",
+      "clear": "Effacer"
+    }
+  },
+  "exercises": {
+    "title": "Exercices",
+    "start": "Commencer l'exercice",
+    "submit": "Soumettre la réponse",
+    "hint": "Obtenir un indice",
+    "solution": "Voir la solution",
+    "next": "Exercice suivant",
+    "answer": "Votre réponse",
+    "correct": "Correct!",
+    "incorrect": "Incorrect. Essayez encore!",
+    "correctAnswer": "Réponse correcte"
+  },
+  "chat": {
+    "typeMessage": "Écrivez un message...",
+    "send": "Envoyer"
+  }
+} 

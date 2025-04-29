@@ -18,9 +18,10 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import DarkModeToggle from '../../features/darkmode/DarkModeToggle';
 
 const MainLayout = ({ children }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -49,6 +50,11 @@ const MainLayout = ({ children }) => {
     } catch (error) {
       console.error('Error logging out:', error);
     }
+  };
+
+  const handleLanguageChange = (language) => {
+    i18n.changeLanguage(language);
+    handleClose();
   };
 
   return (
@@ -86,6 +92,8 @@ const MainLayout = ({ children }) => {
           <IconButton color="inherit">
             <Notifications />
           </IconButton>
+
+          <DarkModeToggle />
 
           <IconButton
             size="large"
@@ -131,6 +139,12 @@ const MainLayout = ({ children }) => {
         </MenuItem>
         <MenuItem onClick={() => { handleClose(); navigate('/settings'); }}>
           {t('user.settings')}
+        </MenuItem>
+        <MenuItem onClick={() => handleLanguageChange('en')}>
+          English
+        </MenuItem>
+        <MenuItem onClick={() => handleLanguageChange('fr')}>
+          Français
         </MenuItem>
         <MenuItem onClick={() => { handleClose(); handleLogout(); }}>
           {t('user.logout')}

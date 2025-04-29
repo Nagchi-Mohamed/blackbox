@@ -21,6 +21,7 @@ import {
   onAuthStateChanged
 } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getFirestore, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // Validate environment variables
 const requiredEnvVars = [
@@ -51,6 +52,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+export const db = getFirestore(app);
 
 // Providers
 export const googleProvider = new GoogleAuthProvider();
@@ -151,6 +153,35 @@ export const verifyTwoFactorCode = async (user, verificationId, verificationCode
   } catch (error) {
     return { success: false, error };
   }
+};
+
+// Firestore helper functions
+export const addMessage = async (messageData) => {
+  try {
+    const docRef = await addDoc(collection(db, 'messages'), {
+      ...messageData,
+      timestamp: serverTimestamp()
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const subscribeToMessages = (userId, callback) => {
+  const q = query(
+    collection(db, 'messages'),
+    where('participants', 'array-contains', userId),
+    orderBy('timestamp', 'asc')
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const messages = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    callback(messages);
+  });
 };
 
 // Export auth methods

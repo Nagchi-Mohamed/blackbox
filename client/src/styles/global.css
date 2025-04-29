@@ -1,0 +1,109 @@
+/* Tailwind-like utility classes */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #4361ee;
+  --secondary: #3f37c9;
+  --dark: #1b263b;
+  --light: #f8f9fa;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--light);
+  color: var(--dark);
+}
+
+/* Classroom styles */
+.classroom-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  height: 100vh;
+  padding: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .classroom-container {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.whiteboard-container {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.participants-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .participants-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .participants-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--dark);
+    color: var(--light);
+  }
+
+  .whiteboard-container {
+    background-color: #2d3748;
+  }
+}
+
+/* Toolbar styles */
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.toolbar button {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  background-color: #f3f4f6;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.toolbar button:hover {
+  background-color: #e5e7eb;
+}
+
+/* Language switcher */
+.language-switcher {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.language-switcher button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  background-color: #f3f4f6;
+  border: none;
+  cursor: pointer;
+}
+
+.language-switcher button.active {
+  background-color: var(--primary);
+  color: white;
+} 

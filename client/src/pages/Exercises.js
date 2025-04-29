@@ -1,58 +1,88 @@
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Container, Typography, Box, Grid } from '@mui/material';
-import ExerciseCard from '../components/exercises/ExerciseCard';
+import { Box, Typography, Paper, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import ExerciseRenderer from '../components/exercises/ExerciseRenderer';
+import { generateMathExercise, checkAnswer } from '../services/exerciseService';
 
 const Exercises = () => {
   const { t } = useTranslation();
-  
-  // Sample exercise data - this would come from an API in a real app
-  const sampleExercises = [
-    {
-      title: "Quadratic Equations",
-      question: "Solve for x: x² - 5x + 6 = 0",
-      hint: t('exercises.hint'),
-      solution: "x = 2 or x = 3",
-      steps: [
-        "Factor the quadratic: (x - 2)(x - 3) = 0",
-        "Set each factor equal to zero: x - 2 = 0 or x - 3 = 0",
-        "Solve for x: x = 2 or x = 3"
-      ]
-    },
-    {
-      title: "Linear Equations",
-      question: "Solve for x: 2x + 5 = 13",
-      hint: t('exercises.hint'),
-      solution: "x = 4",
-      steps: [
-        "Subtract 5 from both sides: 2x = 8",
-        "Divide both sides by 2: x = 4"
-      ]
+  const [exercise, setExercise] = useState(null);
+  const [type, setType] = useState('algebra');
+  const [difficulty, setDifficulty] = useState('easy');
+  const [score, setScore] = useState(0);
+  const [totalAttempts, setTotalAttempts] = useState(0);
+
+  const handleGenerateExercise = () => {
+    const newExercise = generateMathExercise(type, difficulty);
+    setExercise(newExercise);
+  };
+
+  const handleSubmitAnswer = (answer) => {
+    const result = checkAnswer(exercise, answer);
+    setTotalAttempts(prev => prev + 1);
+    if (result.isCorrect) {
+      setScore(prev => prev + 1);
     }
-  ];
+  };
+
+  const handleHint = () => {
+    // Implement hint system
+  };
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {t('navigation.exercises')}
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary" paragraph>
-          {t('exercises.practice')}
-        </Typography>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        {t('exercises.title')}
+      </Typography>
 
-        <Grid container spacing={3}>
-          {sampleExercises.map((exercise, index) => (
-            <Grid item xs={12} key={index}>
-              <ExerciseCard 
-                exercise={exercise}
-                level="High School"
-                topic="Algebra"
-              />
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-    </Container>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>{t('exercises.type')}</InputLabel>
+            <Select
+              value={type}
+              label={t('exercises.type')}
+              onChange={(e) => setType(e.target.value)}
+            >
+              <MenuItem value="algebra">{t('exercises.algebra')}</MenuItem>
+              <MenuItem value="geometry">{t('exercises.geometry')}</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>{t('exercises.difficulty')}</InputLabel>
+            <Select
+              value={difficulty}
+              label={t('exercises.difficulty')}
+              onChange={(e) => setDifficulty(e.target.value)}
+            >
+              <MenuItem value="easy">{t('exercises.easy')}</MenuItem>
+              <MenuItem value="medium">{t('exercises.medium')}</MenuItem>
+              <MenuItem value="hard">{t('exercises.hard')}</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Button
+            variant="contained"
+            onClick={handleGenerateExercise}
+          >
+            {t('exercises.generate')}
+          </Button>
+        </Box>
+
+        <Typography variant="body1" gutterBottom>
+          {t('exercises.score')}: {score}/{totalAttempts}
+        </Typography>
+      </Paper>
+
+      {exercise && (
+        <ExerciseRenderer
+          exercise={exercise}
+          onSubmit={handleSubmitAnswer}
+          onHint={handleHint}
+        />
+      )}
+    </Box>
   );
 };
 
