@@ -1,0 +1,14 @@
+{
+  "submit": "Soumettre la réponse",
+  "correct": "Correct!",
+  "incorrect": "Incorrect",
+  "difficulty": {
+    "easy": "Facile",
+    "medium": "Moyen",
+    "hard": "Difficile"
+  },
+  "showSolution": "Afficher la solution",
+  "hideSolution": "Masquer la solution",
+  "solution": "Solution",
+  "correctAnswer": "Bonne réponse"
+}

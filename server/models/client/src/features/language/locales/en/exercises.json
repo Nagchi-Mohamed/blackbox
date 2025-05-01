@@ -1,0 +1,14 @@
+{
+  "submit": "Submit Answer",
+  "correct": "Correct!",
+  "incorrect": "Incorrect",
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "showSolution": "Show Solution",
+  "hideSolution": "Hide Solution",
+  "solution": "Solution",
+  "correctAnswer": "Correct Answer"
+}

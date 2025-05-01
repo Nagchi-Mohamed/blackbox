@@ -2,10 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { Mic, MicOff, Videocam, VideocamOff } from '@mui/icons-material';
-import React, { useEffect, useRef, useState } from 'react';
-import AgoraRTC from 'agora-rtc-sdk-ng';
-import { Box, IconButton, Stack, Typography } from '@mui/material';
-import { Mic, MicOff, Videocam, VideocamOff } from '@mui/icons-material';
+
 const Whiteboard = ({ roomId }) => {
   const [localTracks, setLocalTracks] = useState([]);
   const [hasAudio, setHasAudio] = useState(false);
@@ -21,7 +18,6 @@ const Whiteboard = ({ roomId }) => {
   };
 
   useEffect(() => {
-    AgoraRTC.setLogLevel(4);
     client.current = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
     
     const joinRoom = async () => {

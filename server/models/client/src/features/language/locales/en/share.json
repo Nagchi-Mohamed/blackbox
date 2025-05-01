@@ -1,0 +1,5 @@
+{
+  "button": "Share",
+  "message": "I just unlocked the {achievement} achievement!",
+  "notSupported": "Sharing is not supported in your browser"
+}

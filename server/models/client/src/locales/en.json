@@ -1,0 +1,52 @@
+{
+  "common": {
+    "welcome": "Welcome to BrainyMath",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success!",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "submit": "Submit"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password"
+  },
+  "classroom": {
+    "title": "Classroom",
+    "join": "Join Class",
+    "leave": "Leave Class",
+    "participants": "Participants",
+    "chat": "Chat",
+    "whiteboard": "Whiteboard",
+    "tools": {
+      "pen": "Pen",
+      "eraser": "Eraser",
+      "select": "Select",
+      "clear": "Clear"
+    }
+  },
+  "exercises": {
+    "title": "Exercises",
+    "start": "Start Exercise",
+    "submit": "Submit Answer",
+    "hint": "Get Hint",
+    "solution": "View Solution",
+    "next": "Next Exercise",
+    "answer": "Your Answer",
+    "correct": "Correct!",
+    "incorrect": "Incorrect. Try again!",
+    "correctAnswer": "Correct Answer"
+  },
+  "chat": {
+    "typeMessage": "Type a message...",
+    "send": "Send"
+  }
+} 

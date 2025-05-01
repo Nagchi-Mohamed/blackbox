@@ -20,11 +20,17 @@ import { themes } from './theme';
 import { Box } from '@mui/material';
 import { ClassroomProvider } from './components/classroom/ClassroomProvider';
 import ClassroomLayout from './components/classroom/ClassroomLayout';
+import AgoraRTC from 'agora-rtc-sdk-ng';
 
 function App() {
   const { i18n } = useTranslation();
   const themeMode = 'light';
   
+  useEffect(() => {
+    // Initialize Agora RTC when app loads
+    AgoraRTC.setLogLevel(4); // Set appropriate log level
+  }, []);
+
   return (
     <ThemeProvider theme={themes[themeMode]}>
       <Box sx={{ 
@@ -69,4 +75,3 @@ function App() {
 }
 
 export default App;
-// Remove this line: import AgoraRTC from 'agora-rtc-sdk-ng';
