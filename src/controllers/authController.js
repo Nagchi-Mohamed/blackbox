@@ -1,17 +1,21 @@
-const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { BadRequestError, UnauthorizedError } = require('../errors');
+const { pool } = require('../utils/db');
+const logger = require('../utils/logger');
+const User = require('../models/User'); // Add this import
+const { BadRequestError, UnauthorizedError } = require('../errors'); // Add error imports
 
-const register = async (req, res) => {
+exports.register = async (req, res, next) => {
   try {
+    // Registration logic here
     const { username, email, password, role, first_name, last_name } = req.body;
-
+  
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
       throw new BadRequestError('Email already registered');
     }
-
+  
     // Create user
     const user_id = await User.create({
       username,
@@ -21,14 +25,14 @@ const register = async (req, res) => {
       first_name,
       last_name
     });
-
+  
     // Generate JWT token
     const token = jwt.sign(
       { user_id, role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
-
+  
     res.status(201).json({
       success: true,
       data: {
@@ -44,30 +48,27 @@ const register = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || 'Server error'
-    });
+    next(error);
   }
 };
 
-const login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
+    // Login logic here
     const { email, password } = req.body;
-
+  
     // Find user by email
     const user = await User.findByEmail(email);
     if (!user) {
       throw new UnauthorizedError('Invalid email or password');
     }
-
+  
     // Check password
     const isValid = await User.verifyPassword(password, user.password);
     if (!isValid) {
       throw new UnauthorizedError('Invalid email or password');
     }
-
+  
     // Generate token
     const token = jwt.sign(
       { 
@@ -77,7 +78,7 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
-
+  
     res.json({
       success: true,
       data: {
@@ -93,22 +94,18 @@ const login = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || 'Server error'
-    });
+    next(error);
   }
 };
 
-const getMe = async (req, res) => {
+exports.getUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.user_id);
     
     if (!user) {
       throw new BadRequestError('User not found');
     }
-
+  
     res.json({
       success: true,
       data: {
@@ -130,9 +127,3 @@ const getMe = async (req, res) => {
     });
   }
 };
-
-module.exports = {
-  register,
-  login,
-  getMe
-}; 

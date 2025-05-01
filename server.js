@@ -9,10 +9,9 @@ const logger = require('./src/utils/logger');
 const mongoose = require('mongoose');
 const errorHandler = require('./src/middleware/errorHandler');
 const { setupTempDir, setupThumbnailCleanup } = require('./src/utils/setupTempDir');
-const socketService = require('./src/services/socketService');
-const { getAvailablePort } = require('./src/utils/portManager');
 const path = require('path');
 const setupSwagger = require('./src/swagger');
+// Remove this line: const routes = require('./routes');
 
 const app = express();
 const httpServer = createServer(app);
@@ -30,17 +29,18 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Setup temp directory and thumbnail cleanup
-setupTempDir();
-setupThumbnailCleanup();
-
-// Setup Swagger documentation
-setupSwagger(app);
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/brainymath', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => logger.info('Connected to MongoDB'))
+.catch(err => logger.error('MongoDB connection error:', err));
 
 // Routes
+// Remove this line: app.use('/api', routes);
 app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/courses', require('./src/routes/courses'));
-app.use('/api/classroom', require('./src/routes/classroom'));
 app.use('/api/whiteboard', require('./src/routes/whiteboard'));
 app.use('/api/recordings', require('./src/routes/recordings'));
 app.use('/api/enrollments', require('./src/routes/enrollments'));
@@ -89,38 +89,9 @@ io.on('connection', (socket) => {
   });
 });
 
-// Start server
-async function startServer() {
-  try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/brainymath', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
-    logger.info('Connected to MongoDB');
+const PORT = process.env.PORT || 8000;
+httpServer.listen(PORT, () => {
+  logger.info(`Server running on port ${PORT}`);
+});
 
-    // Get available port
-    const port = await getAvailablePort(process.env.PORT || 5000);
-    
-    httpServer.listen(port, () => {
-      logger.info(`Server running on port ${port}`);
-    });
-
-    // Handle process termination
-    process.on('SIGTERM', () => {
-      logger.info('SIGTERM received. Shutting down gracefully...');
-      httpServer.close(() => {
-        logger.info('Server closed');
-        process.exit(0);
-      });
-    });
-
-  } catch (error) {
-    logger.error('Failed to start server:', error);
-    process.exit(1);
-  }
-}
-
-startServer();
-
-module.exports = app; 
+module.exports = app;

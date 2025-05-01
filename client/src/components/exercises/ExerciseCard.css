@@ -1,0 +1,21 @@
+.exercise-card {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.solution {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-left: 4px solid #28a745;
+}
+
+.solution-toggle {
+  margin-left: 1rem;
+  background-color: #6c757d;
+  color: white;
+}
+
+// ... existing styles ...

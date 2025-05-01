@@ -82,7 +82,6 @@ const createTables = async () => {
     await connection.query(`
       CREATE TABLE IF NOT EXISTS whiteboard_states (
         state_id INT PRIMARY KEY AUTO_INCREMENT,
-        classroom_id INT,
         state_data JSON,
         thumbnail_path VARCHAR(255),
         created_by INT,
@@ -95,7 +94,6 @@ const createTables = async () => {
     await connection.query(`
       CREATE TABLE IF NOT EXISTS recordings (
         recording_id INT PRIMARY KEY AUTO_INCREMENT,
-        classroom_id INT,
         file_path VARCHAR(255) NOT NULL,
         duration INT,
         created_by INT,

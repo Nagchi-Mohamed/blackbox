@@ -1,0 +1,40 @@
+.classroom-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+.video-container {
+  display: flex;
+  gap: 1rem;
+  height: 30%;
+  padding: 1rem;
+}
+
+.whiteboard-container {
+  flex: 1;
+  position: relative;
+  margin: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .video-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .whiteboard-container {
+    margin: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .classroom-container {
+    height: auto;
+    min-height: 100vh;
+  }
+}

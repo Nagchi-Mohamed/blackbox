@@ -1,0 +1,5 @@
+{
+  "button": "Partager",
+  "message": "Je viens de débloquer l'achievement {achievement} !",
+  "notSupported": "Le partage n'est pas supporté par votre navigateur"
+}

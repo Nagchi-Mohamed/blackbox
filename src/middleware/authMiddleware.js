@@ -28,6 +28,17 @@ const recoveryRateLimit = rateLimit({
   }
 });
 
+const loginRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  message: { 
+    error: { 
+      code: 'rate-limited', 
+      message: 'Too many login attempts, please try again later' 
+    } 
+  }
+});
+
 const auth = (req, res, next) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
@@ -134,5 +145,6 @@ module.exports = {
   authorize,
   isAdmin,
   isTeacher,
-  isStudent
-}; 
+  isStudent,
+  loginRateLimit
+};

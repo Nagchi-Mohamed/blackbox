@@ -1,0 +1,18 @@
+:root {
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --primary-color: #6200ee;
+}
+
+body.light {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+button {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}

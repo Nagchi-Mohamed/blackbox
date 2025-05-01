@@ -35,11 +35,11 @@ class Recording {
     return recordings[0] || null;
   }
 
-  static async create({ title, description, classroom_id, created_by }) {
+  static async create({ title, description, created_by }) {
     const result = await db.execute(
-      `INSERT INTO recordings (title, description, classroom_id, created_by)
-       VALUES (?, ?, ?, ?)`,
-      [title, description, classroom_id, created_by]
+      `INSERT INTO recordings (title, description, created_by)
+       VALUES (?, ?, ?)`,
+      [title, description, created_by]
     );
     return this.findById(result.insertId);
   }

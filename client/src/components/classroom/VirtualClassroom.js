@@ -18,7 +18,7 @@ import {
   MicOff,
   Videocam,
   VideocamOff,
-  ScreenShare,
+  Share,
   StopScreenShare,
   Send
 } from '@mui/icons-material';
@@ -128,7 +128,7 @@ const VirtualClassroom = () => {
               {isVideoOff ? <VideocamOff /> : <Videocam />}
             </IconButton>
             <IconButton onClick={handleToggleScreenShare} color="primary">
-              {isScreenSharing ? <StopScreenShare /> : <ScreenShare />}
+              {isScreenSharing ? <StopScreenShare /> : <Share />}
             </IconButton>
           </Box>
         </Paper>

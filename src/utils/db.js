@@ -1,38 +1,27 @@
 const mongoose = require('mongoose');
-const logger = require('./logger');
-require('dotenv').config();
 
-// MongoDB connection options
-const options = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
+const connectDB = async () => {
+  try {
+    mongoose.connection.on('connected', () => {
+      console.log('MongoDB connected');
+    });
+    
+    mongoose.connection.on('error', (err) => {
+      console.error('MongoDB connection error:', err);
+    });
+
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/brainymath', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s
+      maxPoolSize: 50 // Maximum number of connections
+    });
+    
+    console.log('MongoDB Connected');
+  } catch (err) {
+    console.error('MongoDB Connection Error:', err);
+    process.exit(1);
+  }
 };
 
-// Connect to MongoDB
-async function connectToDatabase() {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/brainymath', options);
-    logger.info('Connected to MongoDB successfully');
-  } catch (error) {
-    logger.error('Error connecting to MongoDB:', error);
-    throw error;
-  }
-}
-
-// Initialize database
-async function initializeDatabase() {
-  try {
-    await connectToDatabase();
-    logger.info('Database initialization completed');
-  } catch (error) {
-    logger.error('Error initializing database:', error);
-    throw error;
-  }
-}
-
-const db = {
-  connection: mongoose.connection,
-  initializeDatabase
-};
-
-module.exports = db; 
+module.exports = connectDB;

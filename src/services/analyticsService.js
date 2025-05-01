@@ -25,18 +25,7 @@ class AnalyticsService {
     ]);
   }
 
-  async getClassroomEngagement(classroomId) {
-    return await mongoose.connection.collection('whiteboardsessions').aggregate([
-      { $match: { classroomId: mongoose.Types.ObjectId(classroomId) } },
-      {
-        $group: {
-          _id: '$classroomId',
-          totalStates: { $sum: 1 },
-          lastUpdated: { $max: '$updatedAt' }
-        }
-      }
-    ]).toArray();
-  }
+  // Removed getClassroomEngagement method as classroom feature is removed
 }
 
 module.exports = new AnalyticsService();

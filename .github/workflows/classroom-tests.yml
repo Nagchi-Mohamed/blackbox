@@ -1,0 +1,12 @@
+name: Classroom Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: npm install
+    - run: npm test -- --coverage --watchAll=false
+    - uses: codecov/codecov-action@v1

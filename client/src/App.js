@@ -15,39 +15,54 @@ import SecuritySettings from './pages/SecuritySettings';
 import TeacherDashboard from './features/teacher/TeacherDashboard';
 import './lib/i18n';
 import './App.css';
+import { themes } from './theme';
+import { Box } from '@mui/material';
+import { ClassroomProvider } from './components/classroom/ClassroomProvider';
+import ClassroomLayout from './components/classroom/ClassroomLayout';
 
 function App() {
   const { i18n } = useTranslation();
-
-  useEffect(() => {
-    document.body.dir = i18n.dir();
-  }, [i18n]);
-
+  const themeMode = 'light'; // or get from context/state if you have theme switching
+  
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <MainLayout>
-            <Routes>
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-              <Route path="/classroom" element={<ProtectedRoute><Classroom /></ProtectedRoute>} />
-              <Route path="/exercises" element={<ProtectedRoute><Exercises /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              <Route path="/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
-              <Route 
-                path="/teacher" 
-                element={
-                  <RoleRoute requiredRoles={{ isTeacher: true }}>
-                    <TeacherDashboard />
-                  </RoleRoute>
-                } 
-              />
-              <Route path="*" element={<div>404 - Page Not Found</div>} />
-            </Routes>
-          </MainLayout>
-        </Router>
-      </AuthProvider>
+    <ThemeProvider theme={themes[themeMode]}>
+      <Box sx={{ 
+        direction: i18n.dir(),
+        fontFamily: i18n.language === 'ar' ? "'Tajawal', sans-serif" : "'Roboto', sans-serif"
+      }}>
+        <AuthProvider>
+          <Router>
+            <MainLayout>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                <Route 
+                  path="/classroom" 
+                  element={
+                    <ProtectedRoute>
+                      <ClassroomProvider>
+                        <ClassroomLayout />
+                      </ClassroomProvider>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="/exercises" element={<ProtectedRoute><Exercises /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                <Route path="/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
+                <Route 
+                  path="/teacher" 
+                  element={
+                    <RoleRoute requiredRoles={{ isTeacher: true }}>
+                      <TeacherDashboard />
+                    </RoleRoute>
+                  } 
+                />
+                <Route path="*" element={<div>404 - Page Not Found</div>} />
+              </Routes>
+            </MainLayout>
+          </Router>
+        </AuthProvider>
+      </Box>
     </ThemeProvider>
   );
 }

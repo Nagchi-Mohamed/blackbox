@@ -151,6 +151,79 @@ const resources = {
         send: 'Envoyer'
       }
     }
+  },
+  es: {
+    translation: {
+      common: {
+        welcome: 'Bienvenido a BrainyMath',
+        loading: 'Cargando...',
+        error: 'Ocurrió un error',
+        save: 'Guardar',
+        delete: 'Delete',
+        edit: 'Edit',
+        submit: 'Submit',
+        create: 'Create'
+      },
+      auth: {
+        login: 'Iniciar sesión',
+        signup: 'Registrarse',
+        logout: 'Logout',
+        email: 'Email',
+        password: 'Password',
+        forgotPassword: 'Forgot Password?',
+        resetPassword: 'Reset Password',
+        twoFactor: {
+          title: 'Two-Factor Authentication',
+          enable: 'Enable 2FA',
+          disable: 'Disable 2FA',
+          verify: 'Verify Code',
+          phoneNumber: 'Phone Number',
+          verificationCode: 'Verification Code'
+        }
+      },
+      classroom: {
+        title: 'Classroom',
+        join: 'Join Class',
+        leave: 'Leave Class',
+        participants: 'Participants',
+        chat: 'Chat',
+        whiteboard: 'Whiteboard',
+        tools: {
+          pen: 'Pen',
+          eraser: 'Eraser',
+          select: 'Select',
+          clear: 'Clear'
+        }
+      },
+      exercises: {
+        title: 'Exercises',
+        start: 'Start Exercise',
+        submit: 'Submit Answer',
+        hint: 'Get Hint',
+        solution: 'View Solution',
+        next: 'Next Exercise',
+        answer: 'Your Answer',
+        correct: 'Correct!',
+        incorrect: 'Incorrect. Try again!',
+        correctAnswer: 'Correct Answer'
+      },
+      teacher: {
+        classes: 'My Classes',
+        createClass: 'Create Class',
+        className: 'Class Name',
+        students: 'Students',
+        studentProgress: 'Student Progress',
+        completedExercises: 'Completed Exercises'
+      },
+      theme: {
+        lightMode: 'Switch to Light Mode',
+        darkMode: 'Switch to Dark Mode'
+      },
+      chat: {
+        typeMessage: 'Type a message...',
+        send: 'Send'
+      }
+    }
   }
 };
 
@@ -165,4 +238,4 @@ i18n
     }
   });
 
-export default i18n; 
+export default i18n;

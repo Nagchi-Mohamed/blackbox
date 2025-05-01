@@ -1,0 +1,13 @@
+{
+  "welcome": "Bienvenue à BrainyMath Pro",
+  "selectLesson": "Sélectionnez une leçon pour commencer.",
+  "searchPlaceholder": "Rechercher des leçons...",
+  "downloadPDF": "Télécharger le PDF",
+  "adminPanel": "Panneau d'administration",
+  "englishTitle": "Titre anglais",
+  "frenchTitle": "Titre français",
+  "englishContent": "Contenu anglais",
+  "frenchContent": "Contenu français",
+  "save": "Enregistrer",
+  "lessonCreated": "Leçon créée !"
+}
