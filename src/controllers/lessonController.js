@@ -105,9 +105,16 @@ const getLessons = async (req, res) => {
   }
 };
 
+const mongoose = require('mongoose');
+
 const getLesson = async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid lesson id' });
+    }
+
     const lesson = await Lesson.findById(id);
     
     if (!lesson) {
@@ -232,11 +239,28 @@ const reorderLessons = async (req, res) => {
   }
 };
 
+// Removed duplicate declaration of Lesson here
+
+const getFeaturedLessons = async (req, res) => {
+  try {
+    // Assuming there is a field 'isFeatured' in Lesson model to mark featured lessons
+    const featuredLessons = await Lesson.find({ isFeatured: true });
+    res.json({
+      success: true,
+      data: featuredLessons
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 module.exports = {
   createLesson,
   getLessons,
   getLesson,
   updateLesson,
   deleteLesson,
-  reorderLessons
-}; 
+  reorderLessons,
+  getFeaturedLessons
+};

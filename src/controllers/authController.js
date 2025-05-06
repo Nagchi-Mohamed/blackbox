@@ -1,129 +1,45 @@
-const bcrypt = require('bcryptjs');
+const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const { pool } = require('../utils/db');
-const logger = require('../utils/logger');
-const User = require('../models/User'); // Add this import
-const { BadRequestError, UnauthorizedError } = require('../errors'); // Add error imports
+const bcrypt = require('bcryptjs');
+const { validationResult } = require('express-validator');
 
-exports.register = async (req, res, next) => {
+exports.register = async (req, res) => {
   try {
-    // Registration logic here
-    const { username, email, password, role, first_name, last_name } = req.body;
-  
-    // Check if user already exists
-    const existingUser = await User.findByEmail(email);
-    if (existingUser) {
-      throw new BadRequestError('Email already registered');
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-  
-    // Create user
-    const user_id = await User.create({
-      username,
-      email,
-      password,
-      role,
-      first_name,
-      last_name
-    });
-  
-    // Generate JWT token
-    const token = jwt.sign(
-      { user_id, role },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-  
-    res.status(201).json({
-      success: true,
-      data: {
-        token,
-        user: {
-          user_id,
-          username,
-          email,
-          role,
-          first_name,
-          last_name
-        }
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
-exports.login = async (req, res, next) => {
-  try {
-    // Login logic here
     const { email, password } = req.body;
-  
-    // Find user by email
-    const user = await User.findByEmail(email);
-    if (!user) {
-      throw new UnauthorizedError('Invalid email or password');
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
     }
-  
-    // Check password
-    const isValid = await User.verifyPassword(password, user.password);
-    if (!isValid) {
-      throw new UnauthorizedError('Invalid email or password');
-    }
-  
-    // Generate token
-    const token = jwt.sign(
-      { 
-        user_id: user.user_id,
-        role: user.role
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-  
-    res.json({
-      success: true,
-      data: {
-        token,
-        user: {
-          user_id: user.user_id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          first_name: user.first_name,
-          last_name: user.last_name
-        }
-      }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = new User({ email, password: hashedPassword });
+    await user.save();
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1h'
     });
+
+    res.status(201).json({ token, userId: user._id });
   } catch (error) {
-    next(error);
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Registration failed' });
   }
 };
 
-exports.getUser = async (req, res) => {
+exports.getUser = async (req) => {
   try {
-    const user = await User.findById(req.user.user_id);
-    
+    const user = await User.findById(req.userId).select('-password');
     if (!user) {
-      throw new BadRequestError('User not found');
+      throw new Error('User not found');
     }
-  
-    res.json({
-      success: true,
-      data: {
-        user: {
-          user_id: user.user_id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          first_name: user.first_name,
-          last_name: user.last_name
-        }
-      }
-    });
+    return user;
   } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || 'Server error'
-    });
+    console.error('Get user error:', error);
+    throw error;
   }
 };

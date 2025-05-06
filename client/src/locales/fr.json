@@ -1,52 +1,113 @@
 {
-  "common": {
-    "welcome": "Bienvenue sur BrainyMath",
-    "loading": "Chargement...",
-    "error": "Une erreur est survenue",
-    "success": "Succès!",
-    "cancel": "Annuler",
-    "save": "Enregistrer",
-    "delete": "Supprimer",
-    "edit": "Modifier",
-    "submit": "Soumettre"
-  },
-  "auth": {
+  "home": "Accueil",
+  "classrooms": "Classes",
+  "groups": "Groupes",
+  "forum_label": "Forum",
+  "contact": "Contact",
+  "change_theme": "Changer le thème",
+  "light": "Clair",
+  "dark": "Sombre",
+  "blue": "Bleu",
+  "change_language": "Changer la langue",
+  "authentication": {
     "login": "Connexion",
-    "signup": "Inscription",
+    "register": "Inscription",
     "logout": "Déconnexion",
-    "email": "Email",
+    "email": "E-mail",
     "password": "Mot de passe",
-    "forgotPassword": "Mot de passe oublié?",
-    "resetPassword": "Réinitialiser le mot de passe"
+    "forgot_password": "Mot de passe oublié ?",
+    "no_account": "Pas de compte ? S'inscrire",
+    "have_account": "Déjà un compte ? Se connecter",
+    "google_login": "Continuer avec Google",
+    "facebook_login": "Continuer avec Facebook"
   },
   "classroom": {
-    "title": "Salle de classe",
     "join": "Rejoindre la classe",
-    "leave": "Quitter la classe",
-    "participants": "Participants",
-    "chat": "Chat",
+    "create": "Créer une classe",
     "whiteboard": "Tableau blanc",
+    "participants": "Participants",
+    "chat": "Discussion",
+    "share_screen": "Partager l'écran",
+    "mute": "Muet",
+    "unmute": "Activer le son",
+    "start_video": "Démarrer la vidéo",
+    "stop_video": "Arrêter la vidéo",
+    "raise_hand": "Lever la main",
+    "leave": "Quitter la classe",
     "tools": {
       "pen": "Stylo",
       "eraser": "Gomme",
-      "select": "Sélectionner",
-      "clear": "Effacer"
+      "text": "Texte",
+      "shapes": "Formes",
+      "undo": "Annuler",
+      "redo": "Rétablir"
     }
   },
-  "exercises": {
-    "title": "Exercices",
-    "start": "Commencer l'exercice",
-    "submit": "Soumettre la réponse",
-    "hint": "Obtenir un indice",
-    "solution": "Voir la solution",
-    "next": "Exercice suivant",
-    "answer": "Votre réponse",
-    "correct": "Correct!",
-    "incorrect": "Incorrect. Essayez encore!",
-    "correctAnswer": "Réponse correcte"
+  "user": {
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "notifications": "Notifications",
+    "my_classes": "Mes classes",
+    "my_groups": "Mes groupes",
+    "account": "Compte"
   },
-  "chat": {
-    "typeMessage": "Écrivez un message...",
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "download": "Télécharger",
+    "upload": "Téléverser",
+    "search": "Rechercher",
     "send": "Envoyer"
-  }
-} 
+  },
+  "errors": {
+    "required": "Ce champ est requis",
+    "invalid_email": "E-mail invalide",
+    "weak_password": "Le mot de passe doit contenir au moins 6 caractères",
+    "connection_error": "Erreur de connexion",
+    "not_found": "Ressource non trouvée",
+    "unauthorized": "Accès non autorisé"
+  },
+  "success": {
+    "logged_in": "Connexion réussie",
+    "registered": "Inscription réussie",
+    "saved": "Enregistré avec succès",
+    "updated": "Mis à jour avec succès",
+    "deleted": "Supprimé avec succès"
+  },
+  "time": {
+    "minutes_ago": "il y a {{count}} minute",
+    "minutes_ago_plural": "il y a {{count}} minutes",
+    "hours_ago": "il y a {{count}} heure",
+    "hours_ago_plural": "il y a {{count}} heures",
+    "days_ago": "il y a {{count}} jour",
+    "days_ago_plural": "il y a {{count}} jours"
+  },
+  "forum": {
+    "topics": "Sujets",
+    "posts": "Publications",
+    "new_topic": "Nouveau sujet",
+    "reply": "Répondre",
+    "last_activity": "Dernière activité",
+    "no_topics": "Aucun sujet trouvé"
+  },
+  "notifications": {
+    "new_message": "Nouveau message",
+    "class_starting": "La classe commence bientôt",
+    "assignment_due": "Devoir à rendre",
+    "view_all": "Voir toutes"
+  },
+  "admin": {
+    "dashboard": "Tableau de bord",
+    "users": "Utilisateurs",
+    "reports": "Rapports",
+    "analytics": "Analytique",
+    "system_settings": "Paramètres système"
+  },
+  "home_hero_headline": "Renforcez votre apprentissage avec BrainyMath Pro",
+  "home_hero_subtitle": "Libérez votre potentiel avec notre plateforme innovante conçue pour améliorer vos compétences en mathématiques grâce à des leçons interactives, des salles de classe collaboratives et un support en temps réel.",
+  "home_get_started": "Commencer",
+  "home_learn_more": "En savoir plus"
+}

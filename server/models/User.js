@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
   role: { type: String, enum: ['student', 'teacher', 'parent', 'admin'], required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
   progress: {
     completedExercises: [{
       exerciseId: {

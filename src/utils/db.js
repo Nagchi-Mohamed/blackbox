@@ -13,8 +13,10 @@ const connectDB = async () => {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/brainymath', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s
-      maxPoolSize: 50 // Maximum number of connections
+      serverSelectionTimeoutMS: 5000,
+      maxPoolSize: 50,
+      retryWrites: true,
+      w: 'majority'
     });
     
     console.log('MongoDB Connected');

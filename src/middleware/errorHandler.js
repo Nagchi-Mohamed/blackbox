@@ -1,66 +1,119 @@
 const logger = require('../utils/logger');
 const ApiError = require('../utils/ApiError');
 
-class AppError extends Error {
-  constructor(statusCode, message) {
+class APIError extends Error {
+  constructor(message, statusCode) {
     super(message);
     this.statusCode = statusCode;
-    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
     this.isOperational = true;
-
-    Error.captureStackTrace(this, this.constructor);
   }
 }
 
-/**
- * Error handling middleware
- */
 const errorHandler = (err, req, res, next) => {
-  // Log the error
-  logger.error('Error:', {
-    message: err.message,
-    stack: err.stack,
+  // Standardized error logging
+  logger.error({
+    timestamp: new Date().toISOString(),
     path: req.path,
-    method: req.method
+    method: req.method,
+    ip: req.ip,
+    user: req.user?.id || 'anonymous',
+    error: {
+      name: err.name,
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    }
   });
 
-  // Handle specific error types
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
+  // Handle operational errors
+  if (err.isOperational) {
+    return res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+  }
+
+  // Error type handlers
+  const errorHandlers = {
+    ValidationError: () => ({
+      status: 400,
       message: 'Validation Error',
       errors: Object.values(err.errors).map(e => e.message)
-    });
-  }
-
-  if (err.name === 'CastError') {
-    return res.status(400).json({
+    }),
+    CastError: () => ({
+      status: 400,
       message: 'Invalid ID format'
-    });
-  }
-
-  if (err.name === 'JsonWebTokenError') {
-    return res.status(401).json({
+    }),
+    JsonWebTokenError: () => ({
+      status: 401,
       message: 'Invalid token'
-    });
-  }
-
-  if (err.name === 'TokenExpiredError') {
-    return res.status(401).json({
+    }),
+    TokenExpiredError: () => ({
+      status: 401,
       message: 'Token expired'
-    });
+    }),
+    11000: () => ({
+      status: 400,
+      message: 'Duplicate field value entered',
+      field: err.keyValue ? Object.keys(err.keyValue)[0] : undefined
+    }),
+    TooManyRequestsError: () => ({
+      status: 429,
+      message: 'Too many requests, please try again later',
+      retryAfter: req.rateLimit?.resetTime
+    }),
+    MongoNetworkError: () => ({
+      status: 503,
+      message: 'Database connection error'
+    }),
+    RequestValidationError: () => ({
+      status: 422,
+      message: 'Invalid request data'
+    }),
+    MulterError: () => ({
+      status: 400,
+      message: 'File upload error',
+      details: err.message
+    }),
+    FileSizeError: () => ({
+      status: 413,
+      message: 'File size exceeds limit',
+      limit: `${err.limit / 1024 / 1024}MB`
+    }),
+    ForbiddenError: () => ({
+      status: 403,
+      message: 'Insufficient permissions'
+    }),
+    UnauthorizedError: () => ({
+      status: 401,
+      message: 'Authentication required'
+    }),
+    MaintenanceError: () => ({
+      status: 503,
+      message: 'Service temporarily unavailable for maintenance',
+      estimatedRestoration: err.estimatedRestoration
+    })
+  };
+
+  // Handle known errors
+  const handler = errorHandlers[err.name] || errorHandlers[err.code];
+  if (handler) {
+    const { status, ...response } = handler();
+    return res.status(status).json(response);
   }
 
-  // Handle mongoose duplicate key error
-  if (err.code === 11000) {
-    return res.status(400).json({
-      message: 'Duplicate field value entered'
-    });
+  // Unknown error (production vs development)
+  const response = {
+    status: 'error',
+    message: 'Something went wrong'
+  };
+
+  if (process.env.NODE_ENV === 'development') {
+    response.error = err;
+    response.stack = err.stack;
   }
 
-  // Default error response
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal server error'
-  });
+  res.status(500).json(response);
 };
 
-module.exports = errorHandler; 
+module.exports = errorHandler;

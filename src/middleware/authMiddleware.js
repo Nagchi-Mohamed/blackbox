@@ -141,8 +141,8 @@ exports.historyRateLimit = historyRateLimit;
 exports.recoveryRateLimit = recoveryRateLimit;
 
 module.exports = {
-  auth,
-  authorize,
+  authenticate: exports.authenticate,
+  authorize: exports.authorize,
   isAdmin,
   isTeacher,
   isStudent,

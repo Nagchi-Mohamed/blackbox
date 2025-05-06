@@ -1,0 +1,113 @@
+{
+  "home": "Inicio",
+  "classrooms": "Aulas",
+  "groups": "Grupos",
+  "forum_label": "Foro",
+  "contact": "Contacto",
+  "change_theme": "Cambiar tema",
+  "light": "Claro",
+  "dark": "Oscuro",
+  "blue": "Azul",
+  "change_language": "Cambiar idioma",
+  "authentication": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgot_password": "¿Olvidó su contraseña?",
+    "no_account": "¿No tiene una cuenta? Regístrese",
+    "have_account": "¿Ya tiene una cuenta? Iniciar sesión",
+    "google_login": "Continuar con Google",
+    "facebook_login": "Continuar con Facebook"
+  },
+  "classroom": {
+    "join": "Unirse a la clase",
+    "create": "Crear clase",
+    "whiteboard": "Pizarra",
+    "participants": "Participantes",
+    "chat": "Chat",
+    "share_screen": "Compartir pantalla",
+    "mute": "Silenciar",
+    "unmute": "Activar sonido",
+    "start_video": "Iniciar video",
+    "stop_video": "Detener video",
+    "raise_hand": "Levantar la mano",
+    "leave": "Salir de la clase",
+    "tools": {
+      "pen": "Lápiz",
+      "eraser": "Borrador",
+      "text": "Texto",
+      "shapes": "Formas",
+      "undo": "Deshacer",
+      "redo": "Rehacer"
+    }
+  },
+  "user": {
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "notifications": "Notificaciones",
+    "my_classes": "Mis clases",
+    "my_groups": "Mis grupos",
+    "account": "Cuenta"
+  },
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "download": "Descargar",
+    "upload": "Subir",
+    "search": "Buscar",
+    "send": "Enviar"
+  },
+  "errors": {
+    "required": "Este campo es obligatorio",
+    "invalid_email": "Correo electrónico inválido",
+    "weak_password": "La contraseña debe tener al menos 6 caracteres",
+    "connection_error": "Error de conexión",
+    "not_found": "Recurso no encontrado",
+    "unauthorized": "Acceso no autorizado"
+  },
+  "success": {
+    "logged_in": "Inicio de sesión exitoso",
+    "registered": "Registro exitoso",
+    "saved": "Guardado exitosamente",
+    "updated": "Actualizado exitosamente",
+    "deleted": "Eliminado exitosamente"
+  },
+  "time": {
+    "minutes_ago": "hace {{count}} minuto",
+    "minutes_ago_plural": "hace {{count}} minutos",
+    "hours_ago": "hace {{count}} hora",
+    "hours_ago_plural": "hace {{count}} horas",
+    "days_ago": "hace {{count}} día",
+    "days_ago_plural": "hace {{count}} días"
+  },
+  "forum": {
+    "topics": "Temas",
+    "posts": "Publicaciones",
+    "new_topic": "Nuevo tema",
+    "reply": "Responder",
+    "last_activity": "Última actividad",
+    "no_topics": "No se encontraron temas"
+  },
+  "notifications": {
+    "new_message": "Nuevo mensaje",
+    "class_starting": "La clase comienza pronto",
+    "assignment_due": "Tarea próxima",
+    "view_all": "Ver todo"
+  },
+  "admin": {
+    "dashboard": "Panel de control",
+    "users": "Usuarios",
+    "reports": "Informes",
+    "analytics": "Analíticas",
+    "system_settings": "Configuración del sistema"
+  },
+  "home_hero_headline": "Potencia tu aprendizaje con BrainyMath Pro",
+  "home_hero_subtitle": "Desbloquea tu potencial con nuestra plataforma innovadora diseñada para elevar tus habilidades matemáticas a través de lecciones interactivas, aulas colaborativas y soporte en tiempo real.",
+  "home_get_started": "Comenzar",
+  "home_learn_more": "Aprende más"
+}

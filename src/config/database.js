@@ -1,41 +1,20 @@
 const mongoose = require('mongoose');
-const logger = require('./logger');
+const logger = require('../utils/logger');
 
-const connectDb = async () => {
+const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/brainymath';
-    
-    const options = {
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      maxPoolSize: 10,
-      minPoolSize: 5,
-      retryWrites: true,
-      w: 'majority'
-    };
-
-    await mongoose.connect(mongoUri, options);
-    
-    mongoose.connection.on('error', (err) => {
-      logger.error('MongoDB connection error:', err);
+      useCreateIndex: true,
+      useFindAndModify: false
     });
 
-    mongoose.connection.on('disconnected', () => {
-      logger.warn('MongoDB disconnected');
-    });
-
-    mongoose.connection.on('reconnected', () => {
-      logger.info('MongoDB reconnected');
-    });
-
-    logger.info('Successfully connected to MongoDB');
-    return mongoose.connection;
+    logger.info(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    logger.error('Failed to connect to MongoDB:', error);
-    throw error;
+    logger.error(`Database connection error: ${error.message}`);
+    process.exit(1);
   }
 };
 
-module.exports = connectDb; 
+module.exports = connectDB;

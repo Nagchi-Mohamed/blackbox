@@ -11,10 +11,7 @@ const lessonSchema = new mongoose.Schema({
     fr: String,
     es: String
   },
-  pdfUrl: {
-    type: String,
-    required: true
-  },
+  // Removed duplicate pdfUrl field here
   level: {
     type: String,
     enum: ['primary', 'middle', 'high', 'college'],
@@ -22,16 +19,17 @@ const lessonSchema = new mongoose.Schema({
   },
   exercises: [{
     question: {
-      en: String,
-      fr: String,
-      es: String,
-      required: [true, 'Question is required']
+      type: new mongoose.Schema({
+        en: { type: String, required: true },
+        fr: { type: String, required: true },
+        es: { type: String, required: true }
+      }, { _id: false }),
+      required: true
     },
     options: {
-      en: [String],
-      fr: [String],
-      es: [String],
-      required: [true, 'Options are required']
+      en: { type: [String], required: true },
+      fr: { type: [String], required: true },
+      es: { type: [String], required: true }
     },
     correctAnswer: {
       type: Number,
@@ -48,7 +46,7 @@ const lessonSchema = new mongoose.Schema({
       default: 'medium'
     }
   }],
-  pdfUrl: String, // Path to uploaded PDF
+  pdfUrl: String,
   createdAt: { type: Date, default: Date.now },
   pdfDownloads: {
     type: Number,

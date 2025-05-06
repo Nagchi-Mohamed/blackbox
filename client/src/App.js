@@ -1,72 +1,81 @@
-import AgoraRTC from 'agora-rtc-sdk-ng';
-import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider } from './contexts/AuthContext';
-import MainLayout from './components/layout/MainLayout';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import RoleRoute from './components/auth/RoleRoute';
-import AuthPage from './pages/AuthPage';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import getTheme from './theme';
+import { AuthProvider } from './context/AuthContext';
+import { LessonsProvider } from './context/LessonsContext';
+import { ThemeContext } from './context/ThemeContext';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './i18n';
+import Layout from './components/Layout';
 import Home from './pages/Home';
-import Classroom from './pages/Classroom';
-import Exercises from './pages/Exercises';
-import ProfilePage from './pages/ProfilePage';
-import SecuritySettings from './pages/SecuritySettings';
-import TeacherDashboard from './features/teacher/TeacherDashboard';
-import './lib/i18n';
-import './App.css';
-import { themes } from './theme';
-import { Box } from '@mui/material';
-import { ClassroomProvider } from './components/classroom/ClassroomProvider';
-import ClassroomLayout from './components/classroom/ClassroomLayout';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import NotFoundPage from './pages/NotFoundPage';
+import GroupsPage from './pages/GroupsPage';
+import ForumPage from './pages/ForumPage';
+import ContactPage from './pages/ContactPage';
+import ClassroomPage from './pages/ClassroomPage';
+import ClassroomDetailPage from './pages/ClassroomDetailPage';
+import ProtectedRoute from './components/auth/ProtectedRoute'; // Add this import
+import { ClassroomProvider } from './components/classroom/ClassroomProvider'; // Changed from default import
+import ClassroomLayout from './components/classroom/ClassroomLayout'; // And this one
+import LessonsPage from './pages/LessonsPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 function App() {
-  const { i18n } = useTranslation();
-  const themeMode = 'light';
-  
+  const [themeMode, setThemeMode] = React.useState('light');
+
+  const toggleTheme = (mode) => {
+    setThemeMode(mode);
+  };
+
+  const theme = React.useMemo(() => getTheme(themeMode), [themeMode]);
+
   return (
-    <ThemeProvider theme={themes[themeMode]}>
-      <Box sx={{ 
-        direction: i18n.dir(),
-        fontFamily: i18n.language === 'ar' ? "'Tajawal', sans-serif" : "'Roboto', sans-serif"
-      }}>
-        <AuthProvider>
-          <Router>
-            <MainLayout>
-              <Routes>
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                <Route 
-                  path="/classroom" 
-                  element={
-                    <ProtectedRoute>
-                      <ClassroomProvider>
-                        <ClassroomLayout />
-                      </ClassroomProvider>
+    <I18nextProvider i18n={i18n}>
+      <ThemeContext.Provider value={{ themeMode, toggleTheme }}>
+        <Router>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <AuthProvider>
+              <LessonsProvider>
+                <Layout>
+                  <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/classrooms" element={<ClassroomPage />} />
+                  <Route path="/classrooms/:id" element={<ClassroomDetailPage />} />
+                  <Route path="/groups" element={<GroupsPage />} />
+                  <Route path="/forum" element={<ForumPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/lessons" element={<LessonsPage />} />
+                  <Route path="/admin" element={
+                    <ProtectedRoute adminOnly>
+                      <AdminDashboard />
                     </ProtectedRoute>
-                  } 
-                />
-                <Route path="/exercises" element={<ProtectedRoute><Exercises /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                <Route path="/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
-                <Route 
-                  path="/teacher" 
-                  element={
-                    <RoleRoute requiredRoles={{ isTeacher: true }}>
-                      <TeacherDashboard />
-                    </RoleRoute>
-                  } 
-                />
-                <Route path="*" element={<div>404 - Page Not Found</div>} />
-              </Routes>
-            </MainLayout>
-          </Router>
-        </AuthProvider>
-      </Box>
-    </ThemeProvider>
+                  } />
+                  <Route path="/classroom" 
+                    element={
+                      <ProtectedRoute>
+                        <ClassroomProvider>
+                          <ClassroomLayout />
+                        </ClassroomProvider>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </Layout>
+              </LessonsProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </Router>
+      </ThemeContext.Provider>
+    </I18nextProvider>
   );
 }
 
 export default App;
-// Remove this line: import AgoraRTC from 'agora-rtc-sdk-ng';

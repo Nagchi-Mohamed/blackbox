@@ -63,8 +63,7 @@ router.get('/', courseController.getCourses);
  *             schema:
  *               $ref: '#/components/schemas/Course'
  */
-router.use(auth);
-router.post('/', authorize(['teacher', 'admin']), courseController.createCourse);
+router.post('/', auth, authorize(['teacher', 'admin']), courseController.createCourse);
 
 /**
  * @swagger
@@ -128,7 +127,7 @@ router.get('/:id', courseController.getCourseById);
  *       404:
  *         description: Course not found
  */
-router.put('/:id', authorize(['teacher', 'admin']), courseController.updateCourse);
+router.put('/:id', auth, authorize(['teacher', 'admin']), courseController.updateCourse);
 
 /**
  * @swagger
@@ -153,7 +152,7 @@ router.put('/:id', authorize(['teacher', 'admin']), courseController.updateCours
  *       404:
  *         description: Course not found
  */
-router.delete('/:id', authorize(['admin']), courseController.deleteCourse);
+router.delete('/:id', auth, authorize(['admin']), courseController.deleteCourse);
 
 // Enroll in course
 router.post('/:id/enroll', auth, courseController.enrollInCourse);

@@ -1,52 +1,141 @@
 {
-  "common": {
-    "welcome": "Welcome to BrainyMath",
-    "loading": "Loading...",
-    "error": "An error occurred",
-    "success": "Success!",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "submit": "Submit"
-  },
-  "auth": {
+  "home": "Home",
+  "classrooms": "Classrooms",
+  "groups": "Groups",
+  "forum_label": "Forum",
+  "contact": "Contact",
+  "change_theme": "Change theme",
+  "light": "Light",
+  "dark": "Dark",
+  "blue": "Blue",
+  "change_language": "Change language",
+  "authentication": {
     "login": "Login",
-    "signup": "Sign Up",
+    "register": "Register",
     "logout": "Logout",
     "email": "Email",
     "password": "Password",
-    "forgotPassword": "Forgot Password?",
-    "resetPassword": "Reset Password"
+    "forgot_password": "Forgot password?",
+    "no_account": "No account? Sign up",
+    "have_account": "Already have an account? Log in",
+    "google_login": "Continue with Google",
+    "facebook_login": "Continue with Facebook"
   },
   "classroom": {
-    "title": "Classroom",
-    "join": "Join Class",
-    "leave": "Leave Class",
+    "create_first_class": "Create Your First Class",
+    "no_classes": "No classes yet",
+    "class_details": "Class Details",
+    "invite_students": "Invite Students",
+    "class_code": "Class Code",
+    "copy_code": "Copy Code",
+    "student_list": "Student List",
+    "no_students": "No students enrolled yet",
+    "assignments": "Assignments",
+    "students": "Students",
+    "class_name": "Class Name",
+    "join": "Join class",
+    "create": "Create class",
+    "teacher": "Teacher",
+    "whiteboard": "Whiteboard",
     "participants": "Participants",
     "chat": "Chat",
-    "whiteboard": "Whiteboard",
+    "share_screen": "Share screen",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "start_video": "Start video",
+    "stop_video": "Stop video",
+    "raise_hand": "Raise hand",
+    "leave": "Leave class",
     "tools": {
       "pen": "Pen",
       "eraser": "Eraser",
-      "select": "Select",
-      "clear": "Clear"
+      "text": "Text",
+      "shapes": "Shapes",
+      "undo": "Undo",
+      "redo": "Redo"
     }
   },
-  "exercises": {
-    "title": "Exercises",
-    "start": "Start Exercise",
-    "submit": "Submit Answer",
-    "hint": "Get Hint",
-    "solution": "View Solution",
-    "next": "Next Exercise",
-    "answer": "Your Answer",
-    "correct": "Correct!",
-    "incorrect": "Incorrect. Try again!",
-    "correctAnswer": "Correct Answer"
+  "user": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "my_classes": "My classes",
+    "my_groups": "My groups",
+    "account": "Account"
   },
-  "chat": {
-    "typeMessage": "Type a message...",
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "download": "Download",
+    "upload": "Upload",
+    "search": "Search",
     "send": "Send"
-  }
-} 
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalid_email": "Invalid email",
+    "weak_password": "Password must be at least 6 characters",
+    "connection_error": "Connection error",
+   "not_found": "Resource not found",
+    "unauthorized": "Unauthorized access",
+    "page_not_found": "Page Not Found",
+    "page_not_found_message": "The page you're looking for doesn't exist or has been moved."
+  },
+  "success": {
+    "logged_in": "Successfully logged in",
+    "registered": "Successfully registered",
+    "saved": "Successfully saved",
+    "updated": "Successfully updated",
+    "deleted": "Successfully deleted"
+  },
+  "time": {
+    "minutes_ago": "{{count}} minute ago",
+    "minutes_ago_plural": "{{count}} minutes ago",
+    "hours_ago": "{{count}} hour ago",
+    "hours_ago_plural": "{{count}} hours ago",
+    "days_ago": "{{count}} day ago",
+    "days_ago_plural": "{{count}} days ago"
+  },
+  "forum": {
+    "topics": "Topics",
+    "posts": "Posts",
+    "new_topic": "New topic",
+    "reply": "Reply",
+    "last_activity": "Last activity",
+    "no_topics": "No topics found"
+  },
+  "notifications": {
+    "new_message": "New message",
+    "class_starting": "Class starting soon",
+    "assignment_due": "Assignment due",
+    "view_all": "View all"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "reports": "Reports",
+    "analytics": "Analytics",
+    "system_settings": "System settings"
+  },
+  "welcome": "Welcome to",
+  "home_hero_headline": "Empower Your Learning with BrainyMath Pro",
+  "home_hero_subtitle": "Experience the future of math education with BrainyMath Pro — where innovation meets mastery, collaboration sparks creativity, and every learner unlocks their true potential.",
+  "home_get_started": "Get Started",
+  "home_learn_more": "Learn More",
+  "load_error": "Failed to load data",
+  "personalized_learning": "Personalized Learning",
+  "personalized_learning_desc": "Customized lessons tailored to your learning style",
+  "expert_tutors": "Expert Tutors",
+  "expert_tutors_desc": "Learn from qualified teachers",
+  "interactive_tools": "Interactive Tools",
+  "interactive_tools_desc": "Engage with our digital whiteboard",
+  "active_students": "Active Students",
+  "qualified_tutors": "Qualified Tutors",
+  "success_rate": "Success Rate",
+  "support_availability": "Support Availability",
+  "featured_lessons": "Featured Lessons",
+  "no_lessons": "No lessons available"
+}

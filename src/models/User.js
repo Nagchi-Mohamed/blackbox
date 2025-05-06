@@ -2,87 +2,46 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: [true, 'Username is required'],
-    unique: true,
-    trim: true,
-    minlength: [3, 'Username must be at least 3 characters']
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  passwordHash: { type: String, required: true },
+  role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
+  preferences: {
+    darkMode: { type: Boolean, default: false },
+    language: { type: String, enum: ['en', 'fr'], default: 'en' }
   },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    trim: true,
-    lowercase: true,
-    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters']
-  },
-  preferredLanguage: {
-    type: String,
-    enum: ['en', 'fr', 'es'],
-    default: 'en'
-  },
-  darkMode: {
-    type: Boolean,
-    default: false
-  },
-  role: {
-    type: String,
-    enum: ['student', 'teacher', 'parent', 'admin'],
-    required: true
-  },
-  firstName: {
-    type: String,
-    trim: true
-  },
-  lastName: {
-    type: String,
-    trim: true
-  },
-  profilePicture: {
-    type: String
-  },
-  active: {
-    type: Boolean,
-    default: true
-  },
-  lastLogin: {
-    type: Date
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  progress: [{
+    courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
+    completion: { type: Number, default: 0 },
+    lastAccessed: { type: Date, default: Date.now }
+  }],
+  achievements: [{
+    badgeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Badge' },
+    earnedAt: { type: Date, default: Date.now }
+  }],
+  loginHistory: [{
+    ipAddress: String,
+    userAgent: String,
+    timestamp: { type: Date, default: Date.now }
+  }]
+}, { timestamps: true });
 
-// Hash password before saving
+// Password hashing middleware
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    this.updatedAt = new Date();
+    this.password = await bcrypt.hash(this.password, 12);
     next();
   } catch (error) {
     next(error);
   }
 });
 
-// Method to compare password
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+// Instance method for password verification
+userSchema.methods.correctPassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = mongoose.model('User', userSchema);
-
 module.exports = User;

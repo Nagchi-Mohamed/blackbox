@@ -1,54 +1,17 @@
 const mongoose = require('mongoose');
 
 const courseSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  description: {
-    type: String,
-    trim: true
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  modules: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Module'
-  }],
-  level: {
-    type: String,
-    enum: ['beginner', 'intermediate', 'advanced'],
-    required: true
-  },
-  subject: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  active: {
-    type: Boolean,
-    default: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  level: { type: String, enum: ['primary', 'middle', 'high', 'university'], required: true },
+  curriculum: { type: String, enum: ['moroccan', 'international'], required: true },
+  thumbnailUrl: String,
+  lessons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' }],
+  prerequisites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
+  duration: Number, // in hours
+  isActive: { type: Boolean, default: true },
+  languages: [{ type: String, enum: ['en', 'fr'] }],
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+}, { timestamps: true });
 
-// Update the updatedAt timestamp before saving
-courseSchema.pre('save', function(next) {
-  this.updatedAt = new Date();
-  next();
-});
-
-const Course = mongoose.model('Course', courseSchema);
-
-module.exports = Course; 
+module.exports = mongoose.model('Course', courseSchema);

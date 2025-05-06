@@ -1,36 +1,39 @@
 import React from 'react';
-import { Box, Grid, Paper } from '@mui/material';
+import { Box, Tabs, Tab, Paper } from '@mui/material';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Whiteboard from './Whiteboard';
 import ParticipantList from './ParticipantList';
 import Chat from './Chat';
 import FileSharing from './FileSharing';
 import RecordingControl from './RecordingControl';
 
-const ClassroomLayout = () => {
+function ClassroomLayout() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const tabs = [
+    { label: 'Stream', path: 'stream' },
+    { label: 'Classwork', path: 'classwork' },
+    { label: 'People', path: 'people' },
+    { label: 'Grades', path: 'grades' }
+  ];
+
   return (
-    <Box sx={{ height: '100vh', p: 2 }}>
-      <Grid container spacing={2} sx={{ height: '100%' }}>
-        {/* Left Sidebar */}
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <ParticipantList />
-            <RecordingControl />
-            <FileSharing />
-          </Paper>
-        </Grid>
-
-        {/* Main Content */}
-        <Grid item xs={12} md={6}>
-          <Whiteboard />
-        </Grid>
-
-        {/* Right Sidebar */}
-        <Grid item xs={12} md={3}>
-          <Chat />
-        </Grid>
-      </Grid>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Paper elevation={3} sx={{ mb: 2 }}>
+        <Tabs 
+          value={tabs.findIndex(tab => location.pathname.includes(tab.path))}
+          onChange={(e, newValue) => navigate(tabs[newValue].path)}
+        >
+          {tabs.map(tab => (
+            <Tab key={tab.path} label={tab.label} />
+          ))}
+        </Tabs>
+      </Paper>
+      
+      <Outlet /> {/* This will render nested routes */}
     </Box>
   );
-};
+}
 
 export default ClassroomLayout;

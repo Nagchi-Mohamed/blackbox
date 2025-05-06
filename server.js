@@ -1,4 +1,24 @@
 require('dotenv').config();
+
+// Validate required environment variables
+const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
+
+if (missingEnvVars.length > 0) {
+  console.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  process.exit(1);
+}
+
+// Handle unhandled promise rejections and uncaught exceptions
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception thrown:', error);
+  process.exit(1);
+});
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -11,7 +31,6 @@ const errorHandler = require('./src/middleware/errorHandler');
 const { setupTempDir, setupThumbnailCleanup } = require('./src/utils/setupTempDir');
 const path = require('path');
 const setupSwagger = require('./src/swagger');
-// Remove this line: const routes = require('./routes');
 
 const app = express();
 const httpServer = createServer(app);
@@ -38,20 +57,24 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/brainymat
 .catch(err => logger.error('MongoDB connection error:', err));
 
 // Routes
-// Remove this line: app.use('/api', routes);
 app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/courses', require('./src/routes/courses'));
-app.use('/api/whiteboard', require('./src/routes/whiteboard'));
+/* app.use('/api/whiteboard', require('./src/routes/whiteboard')); // Removed due to missing route file */
 app.use('/api/recordings', require('./src/routes/recordings'));
 app.use('/api/enrollments', require('./src/routes/enrollments'));
 app.use('/api/lessons', require('./src/routes/lessons'));
 app.use('/api/modules', require('./src/routes/modules'));
-app.use('/api/interventions', require('./src/routes/interventionRoutes'));
+/* app.use('/api/interventions', require('./src/routes/interventionRoutes')); // Removed due to missing controller */
 app.use('/api/reports', require('./src/routes/reportRoutes'));
 app.use('/api/progress', require('./src/routes/progressRoutes'));
 app.use('/api/adaptive', require('./src/routes/adaptiveRoutes'));
 app.use('/api/ai', require('./src/routes/aiRoutes'));
 app.use('/api/security', require('./src/routes/securityRoutes'));
+
+const classroomsRouter = require('./server/routes/classrooms');
+const classroomContentRouter = require('./server/routes/classroomContent');
+app.use('/api/classrooms', classroomsRouter);
+app.use('/api/classroomContent', classroomContentRouter);
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'client/build')));

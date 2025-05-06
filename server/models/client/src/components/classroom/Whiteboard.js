@@ -4,41 +4,41 @@ import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { Mic, MicOff, Videocam, VideocamOff } from '@mui/icons-material';
 
 const Whiteboard = ({ roomId }) => {
-  const [localTracks, setLocalTracks] = useState([]);
   const [hasAudio, setHasAudio] = useState(false);
   const [hasVideo, setHasVideo] = useState(false);
   const client = useRef();
+  const localTracks = useRef([]);
   const localPlayerContainer = useRef();
 
-  // Developer information
-  const developerInfo = {
-    name: "Mohamed Nagchi",
-    role: "Lead Developer",
-    contact: "mohamed@example.com"
-  };
-
   useEffect(() => {
-    client.current = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-    
-    const joinRoom = async () => {
-      try {
-        await client.current.join(
-          process.env.REACT_APP_AGORA_APP_ID,
-          roomId,
-          null,
-          null
-        );
-      } catch (error) {
-        console.error('Failed to join room:', error);
-      }
-    };
+    try {
+      client.current = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      
+      const joinRoom = async () => {
+        try {
+          await client.current.join(
+            process.env.REACT_APP_AGORA_APP_ID,
+            roomId,
+            null,
+            null
+          );
+        } catch (error) {
+          console.error('Failed to join room:', error);
+        }
+      };
 
-    joinRoom();
+      joinRoom();
 
-    return () => {
-      client.current.leave();
-      localTracks.forEach(track => track.stop());
-    };
+      return () => {
+        client.current.leave();
+        localTracks.current.forEach(track => {
+          track.stop();
+          track.close();
+        });
+      };
+    } catch (error) {
+      console.error('Agora initialization failed:', error);
+    }
   }, [roomId]);
 
   const toggleAudio = async () => {

@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Lesson = require('../models/Lesson');
-const { verifyToken, isAdmin } = require('../middleware/auth');
+const { verifyToken, isAdmin } = require('../middlewares/auth');
+const bcrypt = require('bcrypt');
 
 router.get('/stats', verifyToken, isAdmin, async (req, res) => {
   try {
@@ -61,5 +62,102 @@ router.post('/lessons/:id/exercises', verifyToken, isAdmin, async (req, res) => 
     res.status(400).json({ message: error.message });
   }
 });
+
+// Update exercise in lesson
+router.put('/lessons/:lessonId/exercises/:exerciseId', verifyToken, isAdmin, async (req, res) => {
+  try {
+    const lesson = await Lesson.findById(req.params.lessonId);
+    if (!lesson) return res.status(404).json({ message: 'Lesson not found' });
+
+    const exercise = lesson.exercises.id(req.params.exerciseId);
+    if (!exercise) return res.status(404).json({ message: 'Exercise not found' });
+
+    Object.assign(exercise, req.body);
+    await lesson.save();
+    res.json(exercise);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Delete exercise from lesson
+router.delete('/lessons/:lessonId/exercises/:exerciseId', verifyToken, isAdmin, async (req, res) => {
+  try {
+    const lesson = await Lesson.findById(req.params.lessonId);
+    if (!lesson) return res.status(404).json({ message: 'Lesson not found' });
+
+    const exercise = lesson.exercises.id(req.params.exerciseId);
+    if (!exercise) return res.status(404).json({ message: 'Exercise not found' });
+
+    exercise.remove();
+    await lesson.save();
+    res.json({ message: 'Exercise deleted' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Get all users
+router.get('/users', verifyToken, isAdmin, async (req, res) => {
+  try {
+    const users = await User.find({}, '-passwordHash');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete user
+router.delete('/users/:id', verifyToken, isAdmin, async (req, res) => {
+  try {
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    if (!deletedUser) return res.status(404).json({ message: 'User not found' });
+    res.json({ message: 'User deleted' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Add new user
+router.post('/users', verifyToken, isAdmin, async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body;
+    if (!username || !email || !password || !role) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      return res.status(409).json({ message: 'Username or email already exists' });
+    }
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, email, passwordHash, role });
+    await newUser.save();
+    res.status(201).json({ id: newUser._id, username: newUser.username, email: newUser.email, role: newUser.role });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Update user
+router.put('/users/:id', verifyToken, isAdmin, async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (username) user.username = username;
+    if (email) user.email = email;
+    if (role) user.role = role;
+    if (password) {
+      user.passwordHash = await bcrypt.hash(password, 10);
+    }
+
+    await user.save();
+    res.json({ id: user._id, username: user.username, email: user.email, role: user.role });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 
 module.exports = router;

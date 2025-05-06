@@ -103,6 +103,52 @@ const TeacherDashboard = () => {
     }
   };
 
+  const handleInviteStudents = async (classId) => {
+    try {
+      const classRef = doc(db, 'classes', classId);
+      await updateDoc(classRef, {
+        students: arrayUnion(...selectedStudents)
+      });
+      setSelectedStudents([]);
+      loadTeacherData();
+    } catch (error) {
+      console.error('Error inviting students:', error);
+    }
+  };
+
+  // Add this state near the top with other useState declarations
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  
+  // Add this in the return section after the classes list
+  {selectedClass && (
+    <Dialog open={!!selectedClass} onClose={() => setSelectedClass(null)}>
+      <DialogTitle>{t('classroom.class_details')}</DialogTitle>
+      <DialogContent>
+        <Typography variant="h6">{selectedClass.name}</Typography>
+        <Typography variant="body2" gutterBottom>
+          {t('classroom.class_code')}: {selectedClass.id}
+        </Typography>
+        <Button 
+          variant="outlined" 
+          onClick={() => navigator.clipboard.writeText(selectedClass.id)}
+        >
+          {t('classroom.copy_code')}
+        </Button>
+        
+        <Box mt={2}>
+          <Typography variant="h6">{t('classroom.student_list')}</Typography>
+          <List>
+            {selectedClass.students?.map(studentId => (
+              <ListItem key={studentId}>
+                <ListItemText primary={studentId} />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </DialogContent>
+    </Dialog>
+  )}
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -205,4 +251,4 @@ const TeacherDashboard = () => {
   );
 };
 
-export default TeacherDashboard; 
+export default TeacherDashboard;

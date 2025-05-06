@@ -23,6 +23,12 @@ router.get(
   lessonController.getLessons
 );
 
+// Get featured lessons
+router.get(
+  '/featured',
+  lessonController.getFeaturedLessons
+);
+
 // Get single lesson
 router.get(
   '/:id',
