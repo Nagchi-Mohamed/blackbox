@@ -27,6 +27,9 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const logger = require('./src/utils/logger');
 const mongoose = require('mongoose');
+mongoose.set('strictQuery', false);  // Add this line to suppress warning
+
+const PORT = process.env.PORT || 6000; // Changed to 6000
 const errorHandler = require('./src/middleware/errorHandler');
 const { setupTempDir, setupThumbnailCleanup } = require('./src/utils/setupTempDir');
 const path = require('path');
@@ -112,9 +115,11 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 8000;
 httpServer.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
+}).on('error', (err) => {
+  logger.error(`Failed to start server: ${err.message}`);
+  process.exit(1);
 });
 
 module.exports = app;

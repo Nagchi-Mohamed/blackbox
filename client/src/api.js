@@ -1,17 +1,11 @@
 import axios from 'axios';
 
+// Update baseURL to point to correct backend port
 const api = axios.create({
-  baseURL: '',
-  timeout: 10000,
-});
-
-// Add a request interceptor to include auth token in headers
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  baseURL: 'http://localhost:5000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 export default api;

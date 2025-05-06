@@ -14,6 +14,7 @@ import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import LanguageSelector from './LanguageSelector';
 import { Link } from 'react-router-dom';
+import Navbar from './Navbar';
 
 const Layout = ({ children }) => {
   const { t } = useTranslation();
@@ -22,7 +23,7 @@ const Layout = ({ children }) => {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             BrainyMath
@@ -52,19 +53,17 @@ const Layout = ({ children }) => {
           
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <LanguageSelector />
-              <Select
-                value={themeMode}
-                onChange={(e) => toggleTheme(e.target.value)}
-                sx={{ color: 'white', minWidth: 100 }}
-                IconComponent={Brightness4}
-              >
-                <MenuItem value="light">{t('light')}</MenuItem>
-                <MenuItem value="dark">{t('dark')}</MenuItem>
-                <MenuItem value="blue">{t('blue')}</MenuItem>
-              </Select>
+            <Select
+              value={themeMode}
+              onChange={(e) => toggleTheme(e.target.value)}
+              sx={{ color: 'white', minWidth: 100 }}
+              IconComponent={Brightness4}
+            />
+            <Navbar />
           </Box>
         </Toolbar>
       </AppBar>
+      <Toolbar /> {/* To offset fixed AppBar height */}
       <main>{children}</main>
     </>
   );

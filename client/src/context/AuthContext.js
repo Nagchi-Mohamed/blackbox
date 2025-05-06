@@ -1,13 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '../api';
+import { useNavigate } from 'react-router-dom';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
+
   const [authState, setAuthState] = useState({
     currentUser: null,
     isAdmin: false,
-    isAuthenticated: false
+    isAuthenticated: false,
+    loading: true,
   });
 
   useEffect(() => {
@@ -19,13 +23,22 @@ export const AuthProvider = ({ children }) => {
           setAuthState({
             currentUser: response.data,
             isAdmin: response.data.role === 'admin',
-            isAuthenticated: true
+            isAuthenticated: true,
+            loading: false,
           });
         })
         .catch(() => {
           localStorage.removeItem('token');
           delete api.defaults.headers.common['Authorization'];
+          setAuthState({
+            currentUser: null,
+            isAdmin: false,
+            isAuthenticated: false,
+            loading: false,
+          });
         });
+    } else {
+      setAuthState(prev => ({ ...prev, loading: false }));
     }
   }, []);
 
@@ -40,8 +53,15 @@ export const AuthProvider = ({ children }) => {
         setAuthState({
           currentUser: userResponse.data,
           isAdmin: userResponse.data.role === 'admin',
-          isAuthenticated: true
+          isAuthenticated: true,
+          loading: false,
         });
+        // Redirect based on role
+        if (userResponse.data.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/home');
+        }
         return true;
       }
       return false;
@@ -51,9 +71,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    delete api.defaults.headers.common['Authorization'];
+    setAuthState({
+      currentUser: null,
+      isAdmin: false,
+      isAuthenticated: false,
+      loading: false,
+    });
+    navigate('/login');
+  };
+
   const value = {
     ...authState,
-    login
+    login,
+    logout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
